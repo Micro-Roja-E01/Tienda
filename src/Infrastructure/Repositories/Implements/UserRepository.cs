@@ -33,6 +33,61 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
                 .ExecuteUpdateAsync(u => u.SetProperty(x => x.EmailConfirmed, true));
             return result > 0;
         }
-        // TODO: Terminar implementacion.
+
+        public async Task<bool> CreateAsync(User user, string password)
+        {
+            var result = await _userManager.CreateAsync(user, password);
+            if (result.Succeeded)
+            {
+                var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                return roleResult.Succeeded;
+            }
+            return false;
+        }
+
+        public async Task<bool> DeleteAsync(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            var result = await _userManager.DeleteAsync(user!);
+            return result.Succeeded;
+        }
+
+        public Task<int> DeleteUnconfirmedAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> ExistsByEmailAsync(string email)
+        {
+            return await _context.Users.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> ExistsByRutAsync(string rut)
+        {
+            return await _context.Users.AnyAsync(u => u.Rut == rut);
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<User?> GetByIdAsync(int id)
+        {
+            return await _userManager.FindByIdAsync(id.ToString());
+        }
+
+        // TODO: Terminar implementacion de funciones de abajo
+        public Task<User?> GetByRutAsync(string rut, bool trackChanges = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<string> GetUserRoleAsync(User user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            return roles.FirstOrDefault()!; // Se obtiene el primer rol del usuario. No puede ser nulo.
+            // El usuario ya deberia tener un rol en la Base de Datos, por eso no se pone el ?? "User".
+        }
     }
 }

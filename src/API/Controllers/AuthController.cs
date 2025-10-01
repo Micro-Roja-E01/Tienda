@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,13 @@ namespace Tienda.src.API.Controllers
     {
         private readonly IUserService _userService = userService;
 
+        //private readonly ICartService _cartService = cartService;
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
-            var token = await _userService.LoginAsync(loginDTO, HttpContext);
-            return Ok(new GenericResponse<string>("Inicio de sesion exitoso", token));
+            var (token, userId) = await _userService.LoginAsync(loginDTO, HttpContext);
+            return Ok(new GenericResponse<string>("Inicio de sesión exitoso", token));
         }
     }
 }

@@ -1,0 +1,28 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Tienda.src.Application.DTO.AuthDTO
+{
+    public class VerifyEmailDTO
+    {
+        /// <summary>
+        /// Correo electrónico del usuario.
+        /// </summary>
+        [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
+        [EmailAddress(ErrorMessage = "El correo electrónico no tiene un formato válido.")]
+        public required string Email { get; set; }
+
+        /// <summary>
+        /// Código de verificación enviado al correo electrónico.
+        /// </summary>
+        [Required(ErrorMessage = "El código de verificación es obligatorio.")]
+        [RegularExpression(
+            @"^\d{6}$",
+            ErrorMessage = "El código de verificación debe tener 6 dígitos."
+        )]
+        public required string VerificationCode { get; set; }
+    }
+}

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tienda.src.API.Controllers
 {
-    public class BaseController
+    public class BaseController : ControllerBase
     {
         [ApiController]
         [Route("api/[controller]")]
