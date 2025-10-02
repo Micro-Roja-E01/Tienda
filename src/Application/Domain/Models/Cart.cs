@@ -14,30 +14,36 @@ namespace Tienda.src.Application.Domain.Models
         /// <value></value>
         [Key]
         public int Id { get; set; }
+
         /// <summary>
         /// Total del carrito de compras con descuento aplicado.
         /// </summary>
         /// <value></value>
         public int Total { get; set; }
+
         /// <summary>
         /// Subtotal del carrito de compras sin descuentos aplicados.
         /// </summary>
         /// <value></value>
         public int SubTotal { get; set; }
+
         /// <summary>
         /// Usuario invitado que posee el carrito de compras.
         /// </summary>
         /// <value></value>
         public required string BuyerId { get; set; } = null!;
+
         /// <summary>
         /// Identificador del usuario registrado que posee el carrito de compras.
         /// </summary>
         /// <value></value>
         public int? UserId { get; set; }
+
         /// <summary>
         /// Lista de artículos en el carrito de compras.
         /// </summary>
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+
         /// <summary>
         /// Fecha de creación del carrito de compras.
         /// </summary>
@@ -47,6 +53,5 @@ namespace Tienda.src.Application.Domain.Models
         /// Fecha de actualización del carrito de compras.
         /// </summary>
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
     }
 }

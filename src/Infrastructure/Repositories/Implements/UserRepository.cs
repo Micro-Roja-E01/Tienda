@@ -39,7 +39,7 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                var roleResult = await _userManager.AddToRoleAsync(user, "Customer");
                 return roleResult.Succeeded;
             }
             return false;

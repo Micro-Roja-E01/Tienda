@@ -20,8 +20,16 @@ namespace Tienda.src.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
+            Log.Information("Intento de inicio de sesión para el usuario: {Email}", loginDTO.Email);
             var (token, userId) = await _userService.LoginAsync(loginDTO, HttpContext);
             return Ok(new GenericResponse<string>("Inicio de sesión exitoso", token));
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
+        {
+            var result = await _userService.RegisterAsync(registerDTO, HttpContext);
+            return Ok(new GenericResponse<string>("Registro exitoso", result));
         }
     }
 }

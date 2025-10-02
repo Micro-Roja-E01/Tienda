@@ -1,9 +1,9 @@
-using Serilog;
 using System.Security;
 using System.Text.Json;
+using Serilog;
 using Tienda.src.Application.DTO.BaseResponse;
 
-namespace Tienda.src.Infrastructure.Middlewares
+namespace Tienda.src.API.Middlewares
 {
     public class ExceptionHandlingMiddleware(RequestDelegate next)
     {

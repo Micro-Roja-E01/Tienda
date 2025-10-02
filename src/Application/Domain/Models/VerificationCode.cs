@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace Tienda.src.Application.Domain.Models
 {
-    
-        public enum CodeType
+    public enum CodeType
     {
         EmailVerification,
         PasswordReset,
-        PasswordChange
+        PasswordChange,
     }
+
     public class VerificationCode
     {
         /// <summary>

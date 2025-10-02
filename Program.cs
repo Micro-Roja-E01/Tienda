@@ -6,22 +6,13 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Resend;
 using Serilog;
-// using Tienda.src.API.Middlewares;
-// using Tienda.src.Application.Jobs;
-// using Tienda.src.Application.Jobs.Interfaces;
-// using Tienda.src.Application.Mappers;
-// using Tienda.src.Application.Services.Implements;
-// using Tienda.src.Application.Services.Implements;
-// using Tienda.src.Application.Services.Interfaces;
-// using Tienda.src.Application.Services.Interfaces;
+using Tienda.src.API.Middlewares;
 using Tienda.src.Application.Domain.Models;
+using Tienda.src.Application.Services.Implements;
+using Tienda.src.Application.Services.Interfaces;
 using Tienda.src.Infrastructure.Data;
-
-// using Tienda.src.Infrastructure.Middlewares;
-// using Tienda.src.Infrastructure.Repositories.Implements;
-// using Tienda.src.Infrastructure.Repositories.Implements;
-// using Tienda.src.Infrastructure.Repositories.Interfaces;
-// using Tienda.src.Infrastructure.Repositories.Interfaces;
+using Tienda.src.Infrastructure.Repositories.Implements;
+using Tienda.src.Infrastructure.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,11 +38,13 @@ builder.Services.AddSwaggerGen();
 // builder.Services.AddScoped<CartMapper>();
 // builder.Services.AddScoped<OrderMapper>();
 
-// builder.Services.AddScoped<ITokenService, TokenService>();
-// builder.Services.AddScoped<IUserService, UserService>();
-// builder.Services.AddScoped<IEmailService, EmailService>();
-// builder.Services.AddScoped<IUserRepository, UserRepository>();
-// builder.Services.AddScoped<IVerificationCodeRepository, VerificationCodeRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IVerificationCodeRepository, VerificationCodeRepository>();
+
 // builder.Services.AddScoped<IFileRepository, FileRepository>();
 // builder.Services.AddScoped<IFileService, FileService>();
 // builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -63,16 +56,16 @@ builder.Services.AddSwaggerGen();
 // builder.Services.AddScoped<IUserJob, UserJob>();
 
 #region Email Service Configuration
-// Log.Information("Configurando servicio de Email");
-// builder.Services.AddOptions();
-// builder.Services.AddHttpClient<ResendClient>();
-// builder.Services.Configure<ResendClientOptions>(o =>
-// {
-//     o.ApiToken =
-//         builder.Configuration["ResendAPIKey"]
-//         ?? throw new InvalidOperationException("El token de API de Resend no está configurado.");
-// });
-// builder.Services.AddTransient<IResend, ResendClient>();
+Log.Information("Configurando servicio de Email");
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(o =>
+{
+    o.ApiToken =
+        builder.Configuration["ResendAPIKey"]
+        ?? throw new InvalidOperationException("El token de API de Resend no está configurado.");
+});
+builder.Services.AddTransient<IResend, ResendClient>();
 #endregion
 
 #region Authentication Configuration
@@ -104,28 +97,27 @@ builder.Services.AddSwaggerGen();
 #endregion
 
 #region Identity Configuration
-// Log.Information("Configurando Identity");
-// builder
-//     .Services.AddIdentityCore<User>(options =>
-//     {
-//         //Configuración de contraseña
-//         options.Password.RequireDigit = true;
-//         options.Password.RequiredLength = 8;
-//         options.Password.RequireNonAlphanumeric = false;
-//
-//         //Configuración de Email
-//         options.User.RequireUniqueEmail = true;
-//
-//         //Configuración de UserName
-//         options.User.AllowedUserNameCharacters =
-//             builder.Configuration["IdentityConfiguration:AllowedUserNameCharacters"]
-//             ?? throw new InvalidOperationException(
-//                 "Los caracteres permitidos para UserName no están configurados."
-//             );
-//     })
-//     .AddRoles<Role>()
-//     .AddEntityFrameworkStores<DataContext>()
-//     .AddDefaultTokenProviders();
+// Agregar servicios de protección de datos necesarios para Identity
+builder.Services.AddDataProtection();
+
+builder
+    .Services.AddIdentityCore<User>(options =>
+    {
+        //Configuración de contraseña
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireNonAlphanumeric = false;
+
+        //Configuración de Email
+        options.User.RequireUniqueEmail = true;
+
+        //Configuración de UserName
+        options.User.AllowedUserNameCharacters =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    })
+    .AddRoles<Role>()
+    .AddEntityFrameworkStores<DataContext>()
+    .AddDefaultTokenProviders();
 #endregion
 
 # region Logging Configuration
@@ -205,6 +197,9 @@ builder.Services.AddDbContext<DataContext>(options => options.UseSqlite(connecti
 #endregion
 var app = builder.Build();
 
+// Usar Middleware para el manejo global de excepciones
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 // Configuración básica de Swagger
 if (app.Environment.IsDevelopment())
 {
@@ -223,10 +218,5 @@ app.MapControllers();
 // Endpoint básico para verificar que la aplicación funciona
 app.MapGet("/", () => "¡Hola! La aplicación Tienda está funcionando correctamente.");
 app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
-
-Console.WriteLine("Aplicación iniciada correctamente.");
-Console.WriteLine(
-    "Navegue a https://localhost:5001 o http://localhost:5000 para ver la aplicación."
-);
 
 app.Run();
