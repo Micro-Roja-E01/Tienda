@@ -3,6 +3,7 @@ obj/
 Properties/
 appsettings.json
 /logs/
+shortcuts.txt
 
 
 ## Ignore Visual Studio temporary files, build results, and

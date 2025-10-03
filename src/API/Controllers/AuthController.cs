@@ -31,5 +31,28 @@ namespace Tienda.src.API.Controllers
             var result = await _userService.RegisterAsync(registerDTO, HttpContext);
             return Ok(new GenericResponse<string>("Registro exitoso", result));
         }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDTO verifyEmailDTO)
+        {
+            var result = await _userService.VerifyEmailAsync(verifyEmailDTO);
+            return Ok(new GenericResponse<string>("Correo verificado exitosamente", result));
+        }
+
+        [HttpPost("resend-email-verification-code")]
+        public async Task<IActionResult> ResendEmailVerificationCode(
+            [FromBody] ResendEmailVerificationCodeDTO resendEmailVerificationCodeDTO
+        )
+        {
+            var message = await _userService.ResendEmailVerificationCodeAsync(
+                resendEmailVerificationCodeDTO
+            );
+            return Ok(
+                new GenericResponse<string>(
+                    "Código de verificación reenviado exitosamente",
+                    message
+                )
+            );
+        }
     }
 }

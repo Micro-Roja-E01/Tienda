@@ -8,6 +8,7 @@ using Resend;
 using Serilog;
 using Tienda.src.API.Middlewares;
 using Tienda.src.Application.Domain.Models;
+using Tienda.src.Application.Mappers;
 using Tienda.src.Application.Services.Implements;
 using Tienda.src.Application.Services.Interfaces;
 using Tienda.src.Infrastructure.Data;
@@ -34,7 +35,8 @@ builder.Services.AddSwaggerGen();
 
 //Mappers
 // builder.Services.AddScoped<ProductMapper>();
-// builder.Services.AddScoped<UserMapper>();
+builder.Services.AddScoped<UserMapper>();
+
 // builder.Services.AddScoped<CartMapper>();
 // builder.Services.AddScoped<OrderMapper>();
 
@@ -109,7 +111,7 @@ builder
         options.Password.RequireNonAlphanumeric = false;
 
         //Configuración de Email
-        options.User.RequireUniqueEmail = true;
+        // options.User.RequireUniqueEmail = true;
 
         //Configuración de UserName
         options.User.AllowedUserNameCharacters =
@@ -218,5 +220,9 @@ app.MapControllers();
 // Endpoint básico para verificar que la aplicación funciona
 app.MapGet("/", () => "¡Hola! La aplicación Tienda está funcionando correctamente.");
 app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
+
+var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+await DataSeeder.Initialize(services);
 
 app.Run();

@@ -1,6 +1,8 @@
+using Serilog;
+using System.Net;
+using System.Runtime.InteropServices.Marshalling;
 using System.Security;
 using System.Text.Json;
-using Serilog;
 using Tienda.src.Application.DTO.BaseResponse;
 
 namespace Tienda.src.API.Middlewares
@@ -64,6 +66,7 @@ namespace Tienda.src.API.Middlewares
                     "Demasiadas solicitudes"
                 ),
                 JsonException _ => (StatusCodes.Status400BadRequest, "JSON inválido"),
+                NullReferenceException => (StatusCodes.Status101SwitchingProtocols, "Test"),
                 _ => (StatusCodes.Status500InternalServerError, "Error interno del servidor"),
             };
         }

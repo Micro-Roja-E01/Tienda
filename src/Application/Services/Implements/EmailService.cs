@@ -48,6 +48,10 @@ namespace Tienda.src.Application.Services.Implements
                     ),
                 HtmlBody = htmlBody,
             };
+
+            Console.WriteLine("Sending email from: ");
+            Console.WriteLine(_configuration["EmailConfiguration:From"]);
+
             await _resend.EmailSendAsync(message);
         }
 
