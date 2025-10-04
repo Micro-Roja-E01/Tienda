@@ -8,6 +8,7 @@ using Resend;
 using Serilog;
 using Tienda.src.API.Middlewares;
 using Tienda.src.Application.Domain.Models;
+using Tienda.src.Application.Jobs;
 using Tienda.src.Application.Mappers;
 using Tienda.src.Application.Services.Implements;
 using Tienda.src.Application.Services.Interfaces;
@@ -172,35 +173,60 @@ builder.Services.AddDbContext<DataContext>(options => options.UseSqlite(connecti
 #endregion
 
 #region Hangfire Configuration
-// Log.Information("Configurando los trabajos en segundo plano de Hangfire");
-// var cronExpression =
-//     builder.Configuration["Jobs:CronJobDeleteUnconfirmedUsers"]
-//     ?? throw new InvalidOperationException(
-//         "La expresión cron para eliminar usuarios no confirmados no está configurada."
-//     );
-// var timeZone = TimeZoneInfo.FindSystemTimeZoneById(
-//     builder.Configuration["Jobs:TimeZone"]
-//         ?? throw new InvalidOperationException(
-//             "La zona horaria para los trabajos no está configurada."
-//         )
-// );
-// builder.Services.AddHangfire(configuration =>
-// {
-//     var connectionStringBuilder = new SqliteConnectionStringBuilder(connectionString);
-//     var databasePath = connectionStringBuilder.DataSource;
-//
-//     configuration.UseSQLiteStorage(databasePath);
-//     configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
-//     configuration.UseSimpleAssemblyNameTypeSerializer();
-//     configuration.UseRecommendedSerializerSettings();
-// });
-// builder.Services.AddHangfireServer();
+Log.Information("Configurando los trabajos en segundo plano de Hangfire");
+var cronExpression =
+     builder.Configuration["Jobs:CronJobDeleteUnconfirmedUsers"]
+     ?? throw new InvalidOperationException(
+         "La expresión cron para eliminar usuarios no confirmados no está configurada."
+     );
+var timeZone = TimeZoneInfo.FindSystemTimeZoneById(
+    builder.Configuration["Jobs:TimeZone"]
+        ?? throw new InvalidOperationException(
+            "La zona horaria para los trabajos no está configurada."
+        ));
+builder.Services.AddHangfire(configuration =>
+ {
+     var connectionStringBuilder = new SqliteConnectionStringBuilder(connectionString);
+     var databasePath = connectionStringBuilder.DataSource;
+
+     configuration.UseSQLiteStorage(databasePath);
+     configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
+     configuration.UseSimpleAssemblyNameTypeSerializer();
+     configuration.UseRecommendedSerializerSettings();
+ });
+builder.Services.AddHangfireServer();
 
 #endregion
+
 var app = builder.Build();
 
-// Usar Middleware para el manejo global de excepciones
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseHangfireDashboard(builder.Configuration["HangfireDashboard:DashboardPath"] ?? throw new InvalidOperationException("La ruta de hangfire no ha sido declarada."), new DashboardOptions
+{
+    StatsPollingInterval = builder.Configuration.GetValue<int?>("HangfireDashboard:StatsPollingInterval") ?? throw new InvalidOperationException("El intervalo de actualización de estadísticas del panel de control de Hangfire no está configurado."),
+    DashboardTitle = builder.Configuration["HangfireDashboard:DashboardTitle"] ?? throw new InvalidOperationException("El título del panel de control de Hangfire no está configurado."),
+    DisplayStorageConnectionString = builder.Configuration.GetValue<bool?>("HangfireDashboard:DisplayStorageConnectionString") ?? throw new InvalidOperationException("La configuración 'HangfireDashboard:DisplayStorageConnectionString' no está definida.")
+}
+);
+
+#region Database Migration and hobs Configuration
+Log.Information("Aplicando migraciones a la base de datos");
+using (var scope = app.Services.CreateScope())
+{
+    await DataSeeder.Initialize(scope.ServiceProvider);
+    var jobId = nameof(UserJob.DeleteUnconfirmedAsync);
+    RecurringJob.AddOrUpdate<UserJob>(
+        jobId,
+        job => job.DeleteUnconfirmedAsync(),
+        cronExpression,
+        new RecurringJobOptions
+        {
+            TimeZone = timeZone
+        }
+    );
+    Log.Information($"Job recurrente '{jobId}' configurando con cron: {cronExpression} en zona horaria {timeZone.Id}");
+    MapperExtensions.ConfigureMapster(scope.ServiceProvider);
+}
+#endregion
 
 // Configuración básica de Swagger
 if (app.Environment.IsDevelopment())
@@ -213,16 +239,20 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+#region Pipeline Configuration
 // Pipeline básico
 app.MapOpenApi();
 app.MapControllers();
-
+// Usar Middleware para el manejo global de excepciones
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 // Endpoint básico para verificar que la aplicación funciona
 app.MapGet("/", () => "¡Hola! La aplicación Tienda está funcionando correctamente.");
 app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
 
-var scope = app.Services.CreateScope();
-var services = scope.ServiceProvider;
-await DataSeeder.Initialize(services);
+// No es util debido al database configuration.
+//var services = scope.ServiceProvider;
+//await DataSeeder.Initialize(services);
 
 app.Run();
+
+#endregion
