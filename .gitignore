@@ -21,6 +21,7 @@ app.db-wal
 
 # appsettings files
 appsettings.json
+launchSettings.json
 
 # bin and obj folders
 [Bb]in/
