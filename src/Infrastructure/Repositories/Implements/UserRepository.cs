@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,18 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
     public class UserRepository : IUserRepository
     {
         private readonly DataContext _context;
+        private readonly int _daysOfDeleteUnconfirmedUsers;
+        private readonly IConfiguration configuration;
         private readonly UserManager<User> _userManager;
+        private readonly IVerificationCodeRepository _verificationCodeRepository;
 
-        public UserRepository(DataContext context, UserManager<User> userManager)
+        public UserRepository(DataContext context, UserManager<User> userManager, IConfiguration configuration, IVerificationCodeRepository verificationCodeRepository)
         {
             _context = context;
             _userManager = userManager;
+            _verificationCodeRepository = verificationCodeRepository;
+            _daysOfDeleteUnconfirmedUsers = configuration.GetValue<int?>("Jobs:DaysOfDeleteUnconfirmedUsers") ?? throw new InvalidOperationException("La configuración 'Jobs:DaysOfDeleteUnconfirmedUsers' no está definida.");
+
         }
 
         public async Task<bool> CheckPasswordAsync(User user, string password)
@@ -52,9 +59,35 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return result.Succeeded;
         }
 
-        public Task<int> DeleteUnconfirmedAsync()
+        // TODO: Revisar que funcione con los metdoso de VerificationCode
+        public async Task<int> DeleteUnconfirmedAsync()
         {
-            throw new NotImplementedException();
+            Log.Information("Iniciando eliminacion de usuarios no confirmados");
+            var cutoffDate = DateTime.UtcNow.AddDays(_daysOfDeleteUnconfirmedUsers);
+            var unconfirmedUsers = await _context.Users
+                .Where(u => !u.EmailConfirmed && u.RegisteredAt < cutoffDate)
+                .Include(u => u.VerificationCodes)
+                .ToListAsync();
+
+            if (!unconfirmedUsers.Any())
+            {
+                Log.Information("No se encontraron usuarios no confirmados para eliminar");
+                return 0;
+            }
+
+            foreach (var user in unconfirmedUsers)
+            {
+                if (user.VerificationCodes.Any())
+                {
+                    await _verificationCodeRepository.DeleteByUserIdAsync(user.Id);
+                }
+            }
+
+            _context.Users.RemoveRange(unconfirmedUsers);
+            await _context.SaveChangesAsync();
+
+            Log.Information($"Eliminados {unconfirmedUsers.Count} usuarios no confirmados");
+            return unconfirmedUsers.Count;
         }
 
         public async Task<bool> ExistsByEmailAsync(string email)
