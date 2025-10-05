@@ -41,7 +41,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// </summary>
         /// <param name="brandName">El nombre de la marca.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con la marca creada o encontrada.</returns>
-        public async Task<Brand> CreateOrGetBrandAsync(string brandName)
+        public async Task<Brand?> CreateOrGetBrandAsync(string brandName)
         {
             var brand = await _context.Brands
                 .AsNoTracking()
@@ -59,7 +59,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// </summary>
         /// <param name="categoryName">El nombre de la categoría.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con la categoría creada o encontrada.</returns>
-        public async Task<Category> CreateOrGetCategoryAsync(string categoryName)
+        public async Task<Category?> CreateOrGetCategoryAsync(string categoryName)
         {
             var category = await _context.Categories
                 .AsNoTracking()
@@ -211,6 +211,52 @@ namespace tienda.src.Infrastructure.Repositories.Implements
             Product? product = await _context.Products.FindAsync(productId) ?? throw new KeyNotFoundException("Producto no encontrado");
             product.Stock = stock;
             await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Actualiza un producto existente.
+        /// </summary>
+        /// <param name="product">El producto con los datos actualizados.</param>
+        /// <returns>Una tarea que representa la operación asíncrona.</returns>
+        public async Task UpdateAsync(Product product)
+        {
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Elimina un producto por su ID.
+        /// </summary>
+        /// <param name="id">El ID del producto a eliminar.</param>
+        /// <returns>Una tarea que representa la operación asíncrona.</returns>
+        public async Task DeleteAsync(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product != null)
+            {
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        /// <summary>
+        /// Verifica si existe un producto con el ID especificado.
+        /// </summary>
+        /// <param name="id">El ID del producto a verificar.</param>
+        /// <returns>Una tarea que representa la operación asíncrona, con true si existe, false en caso contrario.</returns>
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.Products.AnyAsync(p => p.Id == id);
+        }
+
+        /// <summary>
+        /// Retorna una lista de productos para el cliente con los parámetros de búsqueda especificados.
+        /// </summary>
+        /// <param name="searchParams">Parámetros de búsqueda para filtrar los productos.</param>
+        /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el cliente y el conteo total de productos.</returns>
+        public async Task<(IEnumerable<Product> products, int totalCount)> GetFilteredForCostumerAsync(SearchParamsDTO searchParams)
+        {
+            return await GetFilteredForCustomerAsync(searchParams);
         }
     }
 }
