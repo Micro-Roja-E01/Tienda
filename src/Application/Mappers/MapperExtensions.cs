@@ -13,8 +13,8 @@ namespace Tienda.src.Application.Mappers
         /// </summary>
         public static void ConfigureMapster(IServiceProvider serviceProvider)
         {
-            // var productMapper = serviceProvider.GetService<ProductMapper>();
-            // productMapper?.ConfigureAllMappings();
+            var productMapper = serviceProvider.GetService<ProductMapper>();
+            productMapper?.ConfigureAllMappings();
 
             var userMapper = serviceProvider.GetService<UserMapper>();
             userMapper?.ConfigureAllMappings();
