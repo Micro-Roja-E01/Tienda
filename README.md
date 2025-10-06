@@ -17,3 +17,5 @@ Se necesita tener instalado dotnet-sdk 9.0
     ```bash
     dotnet run
 
+## Pruebas de Postman
+Puedes probar la API usando la coleccion de Postman exportada en el archivo "Tienda UCN.postman_collection.json"

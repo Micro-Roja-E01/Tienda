@@ -28,5 +28,6 @@ namespace Tienda.src.Infrastructure.Repositories.Interfaces
         Task<bool> DeleteAsync(int userId);
         Task<bool> ConfirmEmailAsync(string email);
         Task<int> DeleteUnconfirmedAsync();
+        Task<bool> UpdatePasswordAsync(User user, string newPassword);
     }
 }

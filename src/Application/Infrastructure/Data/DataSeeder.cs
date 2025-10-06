@@ -35,7 +35,7 @@ namespace Tienda.src.Infrastructure.Data
                     var roles = new List<Role>
                     {
                         new Role { Name = "Admin", NormalizedName = "ADMIN" },
-                        new Role { Name = "Customer", NormalizedName = "CUSTOMER" },
+                        new Role { Name = "Cliente", NormalizedName = "CLIENTE" },
                     };
                     foreach (var role in roles)
                     {
@@ -89,7 +89,7 @@ namespace Tienda.src.Infrastructure.Data
                 if (!await context.Users.AnyAsync())
                 {
                     Role customerRole =
-                        await context.Roles.FirstOrDefaultAsync(r => r.Name == "Customer")
+                        await context.Roles.FirstOrDefaultAsync(r => r.Name == "Cliente")
                         ?? throw new InvalidOperationException(
                             "El rol de cliente no está configurado."
                         );

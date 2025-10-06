@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Tienda.src.Application.DTO.AuthDTO;
 
 namespace Tienda.src.Application.Services.Interfaces
@@ -15,5 +11,7 @@ namespace Tienda.src.Application.Services.Interfaces
             ResendEmailVerificationCodeDTO resendEmailVerificationCodeDTO
         );
         Task<int> DeleteUnconfirmedAsync();
+        Task<string> RecoverPasswordAsync(RecoverPasswordDTO recoverPasswordDTO);
+        Task<string> ResetPasswordAsync(ResetPasswordDTO resetPasswordDTO);
     }
 }

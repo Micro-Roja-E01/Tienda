@@ -6,8 +6,14 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Resend;
 using Serilog;
+using tienda.src.Application.Services.Implements;
+using tienda.src.Application.Services.Interfaces;
+using tienda.src.Infrastructure.Repositories.Implements;
+using tienda.src.Infrastructure.Repositories.Interfaces;
 using Tienda.src.API.Middlewares;
 using Tienda.src.Application.Domain.Models;
+using Tienda.src.Application.Jobs;
+using Tienda.src.Application.Jobs.Interfaces;
 using Tienda.src.Application.Mappers;
 using Tienda.src.Application.Services.Implements;
 using Tienda.src.Application.Services.Interfaces;
@@ -32,12 +38,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthorization();
 
 //Mappers
-// builder.Services.AddScoped<ProductMapper>();
+builder.Services.AddScoped<ProductMapper>();
 builder.Services.AddScoped<UserMapper>();
-
-// builder.Services.AddScoped<CartMapper>();
+// builder.Services.AddScoped<CartMapper>(); TODO: Hay que realizar el cart mapper
 // builder.Services.AddScoped<OrderMapper>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -47,15 +53,15 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IVerificationCodeRepository, VerificationCodeRepository>();
 
-// builder.Services.AddScoped<IFileRepository, FileRepository>();
-// builder.Services.AddScoped<IFileService, FileService>();
-// builder.Services.AddScoped<IProductRepository, ProductRepository>();
-// builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IFileRepository, FileRepository>();
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 // builder.Services.AddScoped<ICartRepository, CartRepository>();
 // builder.Services.AddScoped<ICartService, CartService>();
 // builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 // builder.Services.AddScoped<IOrderService, OrderService>();
-// builder.Services.AddScoped<IUserJob, UserJob>();
+builder.Services.AddScoped<IUserJob, UserJob>();
 
 #region Email Service Configuration
 Log.Information("Configurando servicio de Email");
@@ -71,31 +77,31 @@ builder.Services.AddTransient<IResend, ResendClient>();
 #endregion
 
 #region Authentication Configuration
-// Log.Information("Configurando autenticación JWT");
-// builder
-//     .Services.AddAuthentication(options =>
-//     {
-//         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//     })
-//     .AddJwtBearer(options =>
-//     {
-//         string jwtSecret =
-//             builder.Configuration["JWTSecret"]
-//             ?? throw new InvalidOperationException("La clave secreta JWT no está configurada.");
-//         options.TokenValidationParameters =
-//             new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-//             {
-//                 ValidateIssuerSigningKey = true,
-//                 IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-//                     System.Text.Encoding.UTF8.GetBytes(jwtSecret)
-//                 ),
-//                 ValidateLifetime = true,
-//                 ValidateIssuer = false,
-//                 ValidateAudience = false,
-//                 ClockSkew = TimeSpan.Zero, //Sin tolerencia a tokens expirados
-//             };
-//     });
+Log.Information("Configurando autenticación JWT");
+builder
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        string jwtSecret =
+            builder.Configuration["JWTSecret"]
+            ?? throw new InvalidOperationException("La clave secreta JWT no está configurada.");
+        options.TokenValidationParameters =
+            new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                    System.Text.Encoding.UTF8.GetBytes(jwtSecret)
+                ),
+                ValidateLifetime = true,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero, //Sin tolerencia a tokens expirados
+            };
+    });
 #endregion
 
 #region Identity Configuration
@@ -172,35 +178,77 @@ builder.Services.AddDbContext<DataContext>(options => options.UseSqlite(connecti
 #endregion
 
 #region Hangfire Configuration
-// Log.Information("Configurando los trabajos en segundo plano de Hangfire");
-// var cronExpression =
-//     builder.Configuration["Jobs:CronJobDeleteUnconfirmedUsers"]
-//     ?? throw new InvalidOperationException(
-//         "La expresión cron para eliminar usuarios no confirmados no está configurada."
-//     );
-// var timeZone = TimeZoneInfo.FindSystemTimeZoneById(
-//     builder.Configuration["Jobs:TimeZone"]
-//         ?? throw new InvalidOperationException(
-//             "La zona horaria para los trabajos no está configurada."
-//         )
-// );
-// builder.Services.AddHangfire(configuration =>
-// {
-//     var connectionStringBuilder = new SqliteConnectionStringBuilder(connectionString);
-//     var databasePath = connectionStringBuilder.DataSource;
-//
-//     configuration.UseSQLiteStorage(databasePath);
-//     configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
-//     configuration.UseSimpleAssemblyNameTypeSerializer();
-//     configuration.UseRecommendedSerializerSettings();
-// });
-// builder.Services.AddHangfireServer();
+Log.Information("Configurando los trabajos en segundo plano de Hangfire");
+var cronExpression =
+    builder.Configuration["Jobs:CronJobDeleteUnconfirmedUsers"]
+    ?? throw new InvalidOperationException(
+        "La expresión cron para eliminar usuarios no confirmados no está configurada."
+    );
+var timeZone = TimeZoneInfo.FindSystemTimeZoneById(
+    builder.Configuration["Jobs:TimeZone"]
+        ?? throw new InvalidOperationException(
+            "La zona horaria para los trabajos no está configurada."
+        )
+);
+builder.Services.AddHangfire(configuration =>
+{
+    var connectionStringBuilder = new SqliteConnectionStringBuilder(connectionString);
+    var databasePath = connectionStringBuilder.DataSource;
+
+    configuration.UseSQLiteStorage(databasePath);
+    configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
+    configuration.UseSimpleAssemblyNameTypeSerializer();
+    configuration.UseRecommendedSerializerSettings();
+});
+builder.Services.AddHangfireServer();
 
 #endregion
+
 var app = builder.Build();
 
-// Usar Middleware para el manejo global de excepciones
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseHangfireDashboard(
+    builder.Configuration["HangfireDashboard:DashboardPath"]
+        ?? throw new InvalidOperationException("La ruta de hangfire no ha sido declarada."),
+    new DashboardOptions
+    {
+        StatsPollingInterval =
+            builder.Configuration.GetValue<int?>("HangfireDashboard:StatsPollingInterval")
+            ?? throw new InvalidOperationException(
+                "El intervalo de actualización de estadísticas del panel de control de Hangfire no está configurado."
+            ),
+        DashboardTitle =
+            builder.Configuration["HangfireDashboard:DashboardTitle"]
+            ?? throw new InvalidOperationException(
+                "El título del panel de control de Hangfire no está configurado."
+            ),
+        DisplayStorageConnectionString =
+            builder.Configuration.GetValue<bool?>(
+                "HangfireDashboard:DisplayStorageConnectionString"
+            )
+            ?? throw new InvalidOperationException(
+                "La configuración 'HangfireDashboard:DisplayStorageConnectionString' no está definida."
+            ),
+    }
+);
+
+#region Database Migration and hobs Configuration
+Log.Information("Aplicando migraciones a la base de datos");
+using (var scope = app.Services.CreateScope())
+{
+    await DataSeeder.Initialize(scope.ServiceProvider);
+    var jobId = nameof(UserJob.DeleteUnconfirmedAsync);
+    RecurringJob.AddOrUpdate<UserJob>(
+        jobId,
+        job => job.DeleteUnconfirmedAsync(),
+        cronExpression,
+        new RecurringJobOptions { TimeZone = timeZone }
+    );
+    Log.Information(
+        $"Job recurrente '{jobId}' configurando con cron: {cronExpression} en zona horaria {timeZone.Id}"
+    );
+    MapperExtensions.ConfigureMapster(scope.ServiceProvider);
+}
+#endregion
 
 // Configuración básica de Swagger
 if (app.Environment.IsDevelopment())
@@ -213,16 +261,26 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+#region Pipeline Configuration
 // Pipeline básico
 app.MapOpenApi();
-app.MapControllers();
 
+// Usar Middleware para el manejo global de excepciones
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Agregar autenticación y autorización
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 // Endpoint básico para verificar que la aplicación funciona
 app.MapGet("/", () => "¡Hola! La aplicación Tienda está funcionando correctamente.");
 app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
 
-var scope = app.Services.CreateScope();
-var services = scope.ServiceProvider;
-await DataSeeder.Initialize(services);
+// No es util debido al database configuration.
+//var services = scope.ServiceProvider;
+//await DataSeeder.Initialize(services);
 
 app.Run();
+
+#endregion
