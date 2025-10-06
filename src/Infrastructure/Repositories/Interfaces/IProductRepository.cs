@@ -108,5 +108,11 @@ namespace tienda.src.Infrastructure.Repositories.Interfaces
         /// <param name="searchParams">Parámetros de búsqueda para filtrar los productos.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el cliente y el conteo total de productos.</returns>
         Task<(IEnumerable<Product> products, int totalCount)> GetFilteredForCostumerAsync(SearchParamsDTO searchParams);
+
+        /// <summary>
+        /// Activa todos los productos en la base de datos (método temporal para desarrollo)
+        /// </summary>
+        /// <returns>Tarea que representa la operación asíncrona</returns>
+        Task ActivateAllAsync();
     }
 }

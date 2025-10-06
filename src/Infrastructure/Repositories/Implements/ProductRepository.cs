@@ -135,7 +135,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
 
             var products = await query
                 .OrderByDescending(p => p.CreatedAt)
-                .Skip((searchParams.PageNumber - 1) * searchParams.PageSize ?? _defaultPageSize)
+                .Skip(((searchParams.PageNumber ?? 1) - 1) * (searchParams.PageSize ?? _defaultPageSize))
                 .Take(searchParams.PageSize ?? _defaultPageSize)
                 .ToArrayAsync();
             int totalCount = await query.CountAsync();
@@ -174,7 +174,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
             int totalCount = await query.CountAsync();
             var products = await query
                 .OrderByDescending(p => p.CreatedAt)
-                .Skip((searchParams.PageNumber - 1) * searchParams.PageSize ?? _defaultPageSize)
+                .Skip(((searchParams.PageNumber ?? 1) - 1) * (searchParams.PageSize ?? _defaultPageSize))
                 .Take(searchParams.PageSize ?? _defaultPageSize)
                 .ToArrayAsync();
 
@@ -257,6 +257,17 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         public async Task<(IEnumerable<Product> products, int totalCount)> GetFilteredForCostumerAsync(SearchParamsDTO searchParams)
         {
             return await GetFilteredForCustomerAsync(searchParams);
+        }
+
+        /// <summary>
+        /// Activa todos los productos en la base de datos (método temporal para desarrollo)
+        /// </summary>
+        /// <returns>Tarea que representa la operación asíncrona</returns>
+        public async Task ActivateAllAsync()
+        {
+            await _context.Products
+                .Where(p => !p.IsAvailable)
+                .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsAvailable, true));
         }
     }
 }
