@@ -19,13 +19,21 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
         private readonly UserManager<User> _userManager;
         private readonly IVerificationCodeRepository _verificationCodeRepository;
 
-        public UserRepository(DataContext context, UserManager<User> userManager, IConfiguration configuration, IVerificationCodeRepository verificationCodeRepository)
+        public UserRepository(
+            DataContext context,
+            UserManager<User> userManager,
+            IConfiguration configuration,
+            IVerificationCodeRepository verificationCodeRepository
+        )
         {
             _context = context;
             _userManager = userManager;
             _verificationCodeRepository = verificationCodeRepository;
-            _daysOfDeleteUnconfirmedUsers = configuration.GetValue<int?>("Jobs:DaysOfDeleteUnconfirmedUsers") ?? throw new InvalidOperationException("La configuración 'Jobs:DaysOfDeleteUnconfirmedUsers' no está definida.");
-
+            _daysOfDeleteUnconfirmedUsers =
+                configuration.GetValue<int?>("Jobs:DaysOfDeleteUnconfirmedUsers")
+                ?? throw new InvalidOperationException(
+                    "La configuración 'Jobs:DaysOfDeleteUnconfirmedUsers' no está definida."
+                );
         }
 
         public async Task<bool> CheckPasswordAsync(User user, string password)
@@ -46,7 +54,7 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                var roleResult = await _userManager.AddToRoleAsync(user, "Customer");
+                var roleResult = await _userManager.AddToRoleAsync(user, "Cliente");
                 return roleResult.Succeeded;
             }
             return false;
@@ -64,8 +72,8 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
         {
             Log.Information("Iniciando eliminacion de usuarios no confirmados");
             var cutoffDate = DateTime.UtcNow.AddDays(_daysOfDeleteUnconfirmedUsers);
-            var unconfirmedUsers = await _context.Users
-                .Where(u => !u.EmailConfirmed && u.RegisteredAt < cutoffDate)
+            var unconfirmedUsers = await _context
+                .Users.Where(u => !u.EmailConfirmed && u.RegisteredAt < cutoffDate)
                 .Include(u => u.VerificationCodes)
                 .ToListAsync();
 
@@ -121,6 +129,25 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             var roles = await _userManager.GetRolesAsync(user);
             return roles.FirstOrDefault()!; // Se obtiene el primer rol del usuario. No puede ser nulo.
             // El usuario ya deberia tener un rol en la Base de Datos, por eso no se pone el ?? "User".
+        }
+
+        public async Task<bool> UpdatePasswordAsync(User user, string newPassword)
+        {
+            // Generar el token de reinicio de contraseña
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // Reiniciar la contraseña usando el token
+            var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
+            if (result.Succeeded)
+            {
+                Log.Information(
+                    $"Contraseña actualizada exitosamente para el usuario: {user.Email}"
+                );
+                return true;
+            }
+            // Error al actualizar la contraseña
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            Log.Warning($"Error al actualizar contraseña para {user.Email}: {errors}");
+            throw new InvalidOperationException($"No se pudo actualizar la contraseña: {errors}");
         }
     }
 }

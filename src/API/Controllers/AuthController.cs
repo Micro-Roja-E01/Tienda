@@ -1,10 +1,5 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Tienda.src.Application.DTO;
 using Tienda.src.Application.DTO.AuthDTO;
 using Tienda.src.Application.Services.Interfaces;
@@ -32,7 +27,7 @@ namespace Tienda.src.API.Controllers
             return Ok(new GenericResponse<string>("Registro exitoso", result));
         }
 
-        [HttpPost("verify-email")]
+        [HttpPost("verify")]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDTO verifyEmailDTO)
         {
             var result = await _userService.VerifyEmailAsync(verifyEmailDTO);
@@ -52,6 +47,24 @@ namespace Tienda.src.API.Controllers
                     "Código de verificación reenviado exitosamente",
                     message
                 )
+            );
+        }
+
+        [HttpPost("recover-password")]
+        public async Task<IActionResult> RecoverPassword(
+            [FromBody] RecoverPasswordDTO recoverPasswordDTO
+        )
+        {
+            var result = await _userService.RecoverPasswordAsync(recoverPasswordDTO);
+            return Ok(new GenericResponse<string>("Recuperación de contraseña exitosa", result));
+        }
+
+        [HttpPatch("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO resetPasswordDTO)
+        {
+            var result = await _userService.ResetPasswordAsync(resetPasswordDTO);
+            return Ok(
+                new GenericResponse<string>("Restablecimiento de contraseña exitoso", result)
             );
         }
     }

@@ -82,6 +82,30 @@ namespace Tienda.src.Application.Services.Implements
             await _resend.EmailSendAsync(message);
         }
 
+        public async Task SendPasswordRecoveryEmailAsync(string email, string code)
+        {
+            var htmlBody = await LoadTemplate("PasswordRecoveryCode", code);
+
+            var message = new EmailMessage
+            {
+                To = email,
+                Subject =
+                    // TODO: Cambiar asunto a codigo de recuperacion
+                    _configuration["EmailConfiguration:VerificationSubject"]
+                    ?? throw new ArgumentNullException(
+                        "El asunto del correo de recuperación de contraseña no puede ser nulo."
+                    ),
+                From =
+                    _configuration["EmailConfiguration:From"]
+                    ?? throw new ArgumentNullException(
+                        "La configuración de 'From' no puede ser nula."
+                    ),
+                HtmlBody = htmlBody,
+            };
+
+            await _resend.EmailSendAsync(message);
+        }
+
         /// <summary>
         /// Carga una plantilla de correo electrónico desde el sistema de archivos y reemplaza el marcador de código.
         /// </summary>
