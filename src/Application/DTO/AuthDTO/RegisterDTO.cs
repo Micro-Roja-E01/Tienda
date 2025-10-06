@@ -23,10 +23,10 @@ namespace Tienda.src.Application.DTO.AuthDTO
         /// <returns></returns>
         [Required(ErrorMessage = "La contraseña es obligatoria.")]
         [RegularExpression(
-            @"^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ])(?=.*[!@#$%^&*()_+\[\]{};':""\\|,.<>/?]).*$",
-            ErrorMessage = "La contraseña debe ser alfanumérica y contener al menos una mayúscula y al menos un caracter especial."
+            @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':""\\|,.<>/?-]).*$",
+            ErrorMessage = "La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial."
         )]
-        [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
+        [MinLength(8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
         [MaxLength(20, ErrorMessage = "La contraseña no puede exceder los 20 caracteres.")]
         public required string Password { get; set; }
 
@@ -60,7 +60,7 @@ namespace Tienda.src.Application.DTO.AuthDTO
             ErrorMessage = "El Nombre solo puede contener carácteres del abecedario español."
         )]
         [MinLength(2, ErrorMessage = "El nombre debe tener mínimo 2 letras.")]
-        [MaxLength(20, ErrorMessage = "El nombre debe tener máximo 20 letras.")]
+        [MaxLength(50, ErrorMessage = "El nombre debe tener máximo 50 letras.")]
         public required string FirstName { get; set; }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Tienda.src.Application.DTO.AuthDTO
             ErrorMessage = "El Apellido solo puede contener carácteres del abecedario español."
         )]
         [MinLength(2, ErrorMessage = "El apellido debe tener mínimo 2 letras.")]
-        [MaxLength(20, ErrorMessage = "El apellido debe tener máximo 20 letras.")]
+        [MaxLength(50, ErrorMessage = "El apellido debe tener máximo 50 letras.")]
         public required string LastName { get; set; }
 
         /// <summary>
@@ -90,8 +90,8 @@ namespace Tienda.src.Application.DTO.AuthDTO
         /// <value></value>
         [Required(ErrorMessage = "El número de teléfono es obligatorio.")]
         [RegularExpression(
-            @"^\d{9}$",
-            ErrorMessage = "El número de teléfono debe tener 9 dígitos."
+            @"^9\d{8}$",
+            ErrorMessage = "El número de teléfono debe tener 9 dígitos y comenzar con 9."
         )]
         public required string PhoneNumber { get; set; }
 

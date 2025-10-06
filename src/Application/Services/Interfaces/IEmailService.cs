@@ -17,5 +17,6 @@ namespace Tienda.src.Application.Services.Interfaces
         /// </summary>
         /// <param name="email">El correo electrónico del usuario.</param>
         Task SendWelcomeEmailAsync(string email);
+        Task SendPasswordRecoveryEmailAsync(string email, string code);
     }
 }

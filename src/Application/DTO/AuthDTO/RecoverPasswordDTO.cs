@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Tienda.src.Application.DTO.AuthDTO
 {
-    public class ResendEmailVerificationCodeDTO
+    public class RecoverPasswordDTO
     {
         /// <summary>
         /// Correo electrónico del usuario.
