@@ -13,6 +13,7 @@ using tienda.src.Infrastructure.Repositories.Interfaces;
 using Tienda.src.API.Middlewares;
 using Tienda.src.Application.Domain.Models;
 using Tienda.src.Application.Jobs;
+using Tienda.src.Application.Jobs.Interfaces;
 using Tienda.src.Application.Mappers;
 using Tienda.src.Application.Services.Implements;
 using Tienda.src.Application.Services.Interfaces;
@@ -37,12 +38,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthorization();
 
 //Mappers
-// builder.Services.AddScoped<ProductMapper>();
+builder.Services.AddScoped<ProductMapper>();
 builder.Services.AddScoped<UserMapper>();
-
-// builder.Services.AddScoped<CartMapper>();
+// builder.Services.AddScoped<CartMapper>(); TODO: Hay que realizar el cart mapper
 // builder.Services.AddScoped<OrderMapper>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -54,13 +55,13 @@ builder.Services.AddScoped<IVerificationCodeRepository, VerificationCodeReposito
 
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IFileService, FileService>();
-// builder.Services.AddScoped<IProductRepository, ProductRepository>();
-// builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 // builder.Services.AddScoped<ICartRepository, CartRepository>();
 // builder.Services.AddScoped<ICartService, CartService>();
 // builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 // builder.Services.AddScoped<IOrderService, OrderService>();
-// builder.Services.AddScoped<IUserJob, UserJob>();
+builder.Services.AddScoped<IUserJob, UserJob>();
 
 #region Email Service Configuration
 Log.Information("Configurando servicio de Email");
@@ -76,31 +77,31 @@ builder.Services.AddTransient<IResend, ResendClient>();
 #endregion
 
 #region Authentication Configuration
-// Log.Information("Configurando autenticación JWT");
-// builder
-//     .Services.AddAuthentication(options =>
-//     {
-//         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//     })
-//     .AddJwtBearer(options =>
-//     {
-//         string jwtSecret =
-//             builder.Configuration["JWTSecret"]
-//             ?? throw new InvalidOperationException("La clave secreta JWT no está configurada.");
-//         options.TokenValidationParameters =
-//             new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-//             {
-//                 ValidateIssuerSigningKey = true,
-//                 IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-//                     System.Text.Encoding.UTF8.GetBytes(jwtSecret)
-//                 ),
-//                 ValidateLifetime = true,
-//                 ValidateIssuer = false,
-//                 ValidateAudience = false,
-//                 ClockSkew = TimeSpan.Zero, //Sin tolerencia a tokens expirados
-//             };
-//     });
+Log.Information("Configurando autenticación JWT");
+builder
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        string jwtSecret =
+            builder.Configuration["JWTSecret"]
+            ?? throw new InvalidOperationException("La clave secreta JWT no está configurada.");
+        options.TokenValidationParameters =
+            new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                    System.Text.Encoding.UTF8.GetBytes(jwtSecret)
+                ),
+                ValidateLifetime = true,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero, //Sin tolerencia a tokens expirados
+            };
+    });
 #endregion
 
 #region Identity Configuration
@@ -246,9 +247,12 @@ if (app.Environment.IsDevelopment())
 #region Pipeline Configuration
 // Pipeline básico
 app.MapOpenApi();
-app.MapControllers();
 // Usar Middleware para el manejo global de excepciones
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+// Agregar autenticación y autorización
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 // Endpoint básico para verificar que la aplicación funciona
 app.MapGet("/", () => "¡Hola! La aplicación Tienda está funcionando correctamente.");
 app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
