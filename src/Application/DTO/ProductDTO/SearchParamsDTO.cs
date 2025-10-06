@@ -5,9 +5,8 @@ namespace tienda.src.Application.DTO.ProductDTO
 {
     public class SearchParamsDTO
     {
-        [Required(ErrorMessage = "El número de página es obligatorio.")]
         [Range(1, int.MaxValue, ErrorMessage = "El número de página debe ser un valor entero positivo.")]
-        public int PageNumber { get; set; }
+        public int? PageNumber { get; set; } = 1;
 
         [Range(1, int.MaxValue, ErrorMessage = "El tamaño de página debe ser un valor entero positivo.")]
         public int? PageSize { get; set; }
