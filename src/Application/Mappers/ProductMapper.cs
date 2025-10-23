@@ -1,5 +1,6 @@
 using Mapster;
 using tienda.src.Application.DTO.ProductDTO;
+using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 using Tienda.src.Application.Domain.Models;
 using Tienda.src.Application.Services.Implements;
 
@@ -26,6 +27,7 @@ namespace Tienda.src.Application.Mappers
         public void ConfigureAllMappings()
         {
             ConfigureProductMappings();
+            ConfigureProductDetailMappings();
         }
 
         public void ConfigureProductMappings()
@@ -33,6 +35,24 @@ namespace Tienda.src.Application.Mappers
             TypeAdapterConfig<Product, ProductDTO>.NewConfig()
                 .Map(dest => dest.ImageUrl, src => src.Images.Any() ? src.Images.First().ImageUrl : _defaultImageUrl)
                 .Map(dest => dest.Price, src => (decimal)src.Price);
+        }
+
+        public void ConfigureProductDetailMappings()
+        {
+            TypeAdapterConfig<Product, ProductDetailDTO>.NewConfig()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.Title, src => src.Title)
+                .Map(dest => dest.Description, src => src.Description)
+                .Map(dest => dest.MainImageURL, src => src.Images.Any() ? src.Images.First().ImageUrl : _defaultImageUrl)
+                .Map(dest => dest.ImageUrls, src => src.Images.Select(img => img.ImageUrl).ToList())
+                .Map(dest => dest.Price, src => src.Price.ToString())
+                .Map(dest => dest.Stock, src => src.Stock)
+                .Map(dest => dest.StockIndicator, src => src.Stock <= _fewUnitsAvailable ? "Pocas unidades disponibles" : "Disponible")
+                .Map(dest => dest.CategoryName, src => src.Category != null ? src.Category.Name : "Sin categoría")
+                .Map(dest => dest.BrandName, src => src.Brand != null ? src.Brand.Name : "Sin marca")
+                .Map(dest => dest.IsAvailable, src => src.IsAvailable)
+                .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+                .Map(dest => dest.UpdatedAt, src => src.UpdatedAt);
         }
     }
 }
