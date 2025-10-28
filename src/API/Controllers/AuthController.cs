@@ -6,11 +6,11 @@ using Tienda.src.Application.Services.Interfaces;
 
 namespace Tienda.src.API.Controllers
 {
-    public class AuthController(IUserService userService) : BaseController
+    public class AuthController(IUserService userService, ICartService cartService) : BaseController
     {
         private readonly IUserService _userService = userService;
 
-        //private readonly ICartService _cartService = cartService;
+        private readonly ICartService _cartService = cartService;
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)

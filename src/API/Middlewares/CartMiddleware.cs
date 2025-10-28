@@ -22,16 +22,13 @@ namespace Tienda.src.API.Middlewares
                     "La expiración en días de la cookie no está configurada."
                 );
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context) // funcion por defecto de todos los middlewares.
         {
             var buyerId = context.Request.Cookies["BuyerId"];
-
             if (string.IsNullOrEmpty(buyerId))
             {
                 Log.Information("No se encontró la cookie de comprador, creando una nueva.");
                 buyerId = Guid.CreateVersion7().ToString();
-
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
@@ -44,7 +41,6 @@ namespace Tienda.src.API.Middlewares
                 Log.Information("Se creó una nueva cookie de comprador: {BuyerId}", buyerId);
             }
             context.Items["BuyerId"] = buyerId; // almacenamos el buyerId en el contexto para ser usado en todo el pipeline
-
             await _next(context);
         }
     }

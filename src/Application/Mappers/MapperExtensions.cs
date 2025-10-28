@@ -19,8 +19,8 @@ namespace Tienda.src.Application.Mappers
             var userMapper = serviceProvider.GetService<UserMapper>();
             userMapper?.ConfigureAllMappings();
 
-            // var cartMapper = serviceProvider.GetService<CartMapper>();
-            // cartMapper?.ConfigureAllMappings();
+            var cartMapper = serviceProvider.GetService<CartMapper>();
+            cartMapper?.ConfigureAllMappings();
 
             // var orderMapper = serviceProvider.GetService<OrderMapper>();
             // orderMapper?.ConfigureAllMappings();

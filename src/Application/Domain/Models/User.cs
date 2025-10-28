@@ -1,8 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Tienda.src.Application.Domain.Models
 {
@@ -22,7 +18,7 @@ namespace Tienda.src.Application.Domain.Models
         public required DateTime BirthDate { get; set; }
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        // TODO: Esto está bien? Revisar
         public ICollection<VerificationCode> VerificationCodes { get; set; } = new List<VerificationCode>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }
