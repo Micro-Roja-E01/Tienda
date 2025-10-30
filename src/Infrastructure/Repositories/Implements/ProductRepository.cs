@@ -4,6 +4,7 @@ using tienda.src.Application.DTO.ProductDTO;
 using tienda.src.Infrastructure.Repositories.Interfaces;
 using Tienda.src.Application.Domain.Models;
 using Tienda.src.Infrastructure.Data;
+using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 
 namespace tienda.src.Infrastructure.Repositories.Implements
 {
@@ -147,38 +148,115 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// </summary>
         /// <param name="searchParams">Parámetros de búsqueda para filtrar los productos.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el cliente y el conteo total de productos.</returns>
-        public async Task<(IEnumerable<Product> products, int totalCount)> GetFilteredForCustomerAsync(SearchParamsDTO searchParams)
+        public async Task<(IEnumerable<ProductForCostumerDTO> products, int totalCount)>GetFilteredForCustomerAsync(SearchParamsDTO searchParams)
         {
+            int pageNumber = searchParams.PageNumber ?? 1;
+            int pageSize   = searchParams.PageSize   ?? _defaultPageSize;
+
+            int fewUnitsThreshold = _configuration.GetValue<int>("Products:FewUnitsAvailable");
+            string fallbackImage  = _configuration["Products:DefaultImageUrl"]
+                ?? "https://shop.songprinting.com/global/images/PublicShop/ProductSearch/prodgr_default_300.png";
+
+            // Base query (solo disponibles)
             var query = _context.Products
+                .AsNoTracking()
                 .Where(p => p.IsAvailable)
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .Include(p => p.Images.OrderBy(i => i.CreatedAt).Take(1))
-                .AsNoTracking();
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Title,
+                    CategoryName = p.Category.Name,
+                    BrandName    = p.Brand.Name,
+                    p.Price,
+                    p.Discount,     // %
+                    p.Stock,
+                    p.IsAvailable,
+                    p.CreatedAt,
+                    MainImageURL = p.Images
+                        .OrderBy(i => i.CreatedAt)
+                        .Select(i => i.ImageUrl)
+                        .FirstOrDefault(),
+                });
 
-
+            // Filtros
             if (!string.IsNullOrWhiteSpace(searchParams.SearchTerm))
             {
-                var searchTerm = searchParams.SearchTerm.Trim().ToLower();
-
+                var term = searchParams.SearchTerm.Trim().ToLower();
                 query = query.Where(p =>
-                    p.Title.ToLower().Contains(searchTerm) ||
-                    p.Description.ToLower().Contains(searchTerm) ||
-                    p.Category.Name.ToLower().Contains(searchTerm) ||
-                    p.Brand.Name.ToLower().Contains(searchTerm) ||
-                    p.Status.ToString().ToLower().Contains(searchTerm) ||
-                    p.Price.ToString().ToLower().Contains(searchTerm) ||
-                    p.Stock.ToString().ToLower().Contains(searchTerm)
-                );
+                    p.Title.ToLower().Contains(term) ||
+                    p.CategoryName.ToLower().Contains(term) ||
+                    p.BrandName.ToLower().Contains(term));
             }
-            int totalCount = await query.CountAsync();
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip(((searchParams.PageNumber ?? 1) - 1) * (searchParams.PageSize ?? _defaultPageSize))
-                .Take(searchParams.PageSize ?? _defaultPageSize)
-                .ToArrayAsync();
+            if (!string.IsNullOrWhiteSpace(searchParams.Category))
+            {
+                var cat = searchParams.Category.Trim().ToLower();
+                query = query.Where(p => p.CategoryName.ToLower() == cat);
+            }
+            if (!string.IsNullOrWhiteSpace(searchParams.Brand))
+            {
+                var br = searchParams.Brand.Trim().ToLower();
+                query = query.Where(p => p.BrandName.ToLower() == br);
+            }
+            if (searchParams.MinPrice.HasValue)
+                query = query.Where(p => p.Price >= searchParams.MinPrice.Value);
+            if (searchParams.MaxPrice.HasValue)
+                query = query.Where(p => p.Price <= searchParams.MaxPrice.Value);
 
-            return (products, totalCount);
+            // Orden seguro
+            bool asc = (searchParams.SortDir ?? "asc").ToLower() == "asc";
+            switch ((searchParams.SortBy ?? "").ToLower())
+            {
+                case "price":
+                    query = asc ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price);
+                    break;
+                case "title":
+                    query = asc ? query.OrderBy(p => p.Title) : query.OrderByDescending(p => p.Title);
+                    break;
+                case "createdat":
+                default:
+                    // por defecto: más nuevos primero
+                    query = asc ? query.OrderByDescending(p => p.CreatedAt) : query.OrderBy(p => p.CreatedAt);
+                    break;
+            }
+
+            int totalCount = await query.CountAsync();
+
+            var page = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var rows = page.Select(p =>
+            {
+                int discountPct = p.Discount;
+                int finalPrice  = p.Price;
+                if (discountPct > 0)
+                {
+                    var discountValue = (int)Math.Ceiling(p.Price * (discountPct / 100.0));
+                    finalPrice = Math.Max(0, p.Price - discountValue);
+                }
+
+                string indicator =
+                    p.Stock <= 0 ? "Sin stock" :
+                    (p.Stock <= fewUnitsThreshold ? "Últimas unidades" : "");
+
+                return new ProductForCostumerDTO
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    MainImageURL = string.IsNullOrWhiteSpace(p.MainImageURL) ? fallbackImage : p.MainImageURL,
+                    Price = p.Price,
+                    DiscountPercentage = discountPct,
+                    FinalPrice = finalPrice,
+                    Stock = p.Stock,
+                    StockIndicator = indicator,
+                    CategoryName = p.CategoryName,
+                    BrandName = p.BrandName,
+                    IsAvailable = p.IsAvailable
+                };
+            }).ToList();
+
+            return (rows, totalCount);
         }
 
         /// <summary>
@@ -254,7 +332,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// </summary>
         /// <param name="searchParams">Parámetros de búsqueda para filtrar los productos.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el cliente y el conteo total de productos.</returns>
-        public async Task<(IEnumerable<Product> products, int totalCount)> GetFilteredForCostumerAsync(SearchParamsDTO searchParams)
+        public async Task<(IEnumerable<object> products, int totalCount)> GetFilteredForCostumerAsync(SearchParamsDTO searchParams)
         {
             return await GetFilteredForCustomerAsync(searchParams);
         }
