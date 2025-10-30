@@ -4,6 +4,7 @@ using tienda.src.Application.DTO.ProductDTO.AdminDTO;
 using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 using Tienda.src.Application.DTO.ProductDTO;
 
+
 namespace tienda.src.Application.Services.Interfaces
 {
 
@@ -53,7 +54,8 @@ namespace tienda.src.Application.Services.Interfaces
         /// </summary>
         /// <param name="searchParams">Parámetros de búsqueda y filtrado</param>
         /// <returns>Lista paginada de productos para clientes</returns>
-        Task<ListedProductsForCostumerDTO> GetFilteredForCostumerAsync(SearchParamsDTO searchParams);
+         Task<ListedProductsForCostumerDTO> GetFilteredForCostumerAsync(SearchParamsDTO searchParams);
+
 
         /// <summary>
         /// Cambia el estado de un producto a activo/inactivo.

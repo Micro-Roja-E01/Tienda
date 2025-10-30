@@ -6,6 +6,7 @@ using tienda.src.Application.Services.Interfaces;
 using Tienda.src.Application.DTO;
 using Tienda.src.Application.DTO.ProductDTO;
 
+
 namespace Tienda.src.API.Controllers
 {
     [Route("api")]
@@ -28,11 +29,13 @@ namespace Tienda.src.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetAllForCostumerAsync([FromQuery] SearchParamsDTO searchParams)
         {
-            var result = await _productService.GetFilteredForCostumerAsync(searchParams);
-            var message = result.Products.Count == 0 ? "No se encontraron productos con los criterios especificados" : "Productos obtenidos exitosamente";
-            return Ok(new GenericResponse<ListedProductsForCostumerDTO>(message, result));
-        }
+            var page = await _productService.GetFilteredForCostumerAsync(searchParams);
+            var message = page.TotalCount == 0
+                ? "No se encontraron productos con los criterios especificados"
+                : "Productos obtenidos exitosamente";
 
+            return Ok(new GenericResponse<ListedProductsForCostumerDTO>(message, page));
+        }
         /// <summary>
         /// Obtiene un producto por id para clientes
         /// </summary>
@@ -42,9 +45,15 @@ namespace Tienda.src.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetByIdForCostumerAsync(int productId)
         {
-            var result = await _productService.GetByIdForCostumerAsync(productId);
-            if (result == null) { throw new KeyNotFoundException($"No se encontró el producto con ID {productId}."); }
-            return Ok(new GenericResponse<ProductDetailDTO>("Producto obtenido exitosamente", result));
+            try
+            {
+                var result = await _productService.GetByIdForCostumerAsync(productId);
+                return Ok(new GenericResponse<ProductDetailDTO>("Producto obtenido exitosamente", result));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         // ----- ADMINS ------ 

@@ -3,6 +3,7 @@ using tienda.src.Application.DTO.ProductDTO.AdminDTO;
 using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 using Tienda.src.Application.Domain.Models;
 
+
 namespace tienda.src.Infrastructure.Repositories.Interfaces
 {
     /// <summary>
@@ -23,7 +24,7 @@ namespace tienda.src.Infrastructure.Repositories.Interfaces
         /// </summary>
         /// <param name="searchParams">Parámetros de búsqueda para filtrar los productos.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el cliente y el conteo total de productos.</returns>
-        Task<(IEnumerable<Product> products, int totalCount)> GetFilteredForCustomerAsync(SearchParamsDTO searchParams);
+        Task<(IEnumerable<ProductForCostumerDTO> products, int totalCount)>GetFilteredForCustomerAsync(SearchParamsDTO searchParams);
 
         /// <summary>
         /// Retorna un producto específico por su ID.
@@ -101,13 +102,6 @@ namespace tienda.src.Infrastructure.Repositories.Interfaces
         /// <param name="id">El ID del producto a verificar.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con true si existe, false en caso contrario.</returns>
         Task<bool> ExistsAsync(int id);
-
-        /// <summary>
-        /// Retorna una lista de productos para el cliente con los parámetros de búsqueda especificados.
-        /// </summary>
-        /// <param name="searchParams">Parámetros de búsqueda para filtrar los productos.</param>
-        /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el cliente y el conteo total de productos.</returns>
-        Task<(IEnumerable<Product> products, int totalCount)> GetFilteredForCostumerAsync(SearchParamsDTO searchParams);
 
         /// <summary>
         /// Activa todos los productos en la base de datos (método temporal para desarrollo)
