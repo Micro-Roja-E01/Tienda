@@ -45,6 +45,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<ProductMapper>();
 builder.Services.AddScoped<UserMapper>();
 builder.Services.AddScoped<CategoryMapper>();
+builder.Services.AddScoped<BrandMapper>();
 // builder.Services.AddScoped<CartMapper>(); TODO: Hay que realizar el cart mapper
 // builder.Services.AddScoped<OrderMapper>();
 
@@ -61,7 +62,8 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-
+builder.Services.AddScoped<IBrandRepository, BrandRepository>();
+builder.Services.AddScoped<IBrandService, BrandService>();
 // builder.Services.AddScoped<ICartRepository, CartRepository>();
 // builder.Services.AddScoped<ICartService, CartService>();
 // builder.Services.AddScoped<IOrderRepository, OrderRepository>();

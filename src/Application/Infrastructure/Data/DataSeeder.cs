@@ -72,7 +72,7 @@ namespace Tienda.src.Infrastructure.Data
                 }
                 else
                 {
-                    // 👇 AQUÍ: actualizar las que quedaron vacías
+                    //  AQUÍ: actualizar las que quedaron vacías
                     var categoriesWithoutSlug = context.Categories
                         .Where(c => string.IsNullOrEmpty(c.Slug))
                         .ToList();
@@ -93,13 +93,31 @@ namespace Tienda.src.Infrastructure.Data
                 {
                     var brands = new List<Brand>
                     {
-                        new Brand { Name = "Sony" },
-                        new Brand { Name = "Apple" },
-                        new Brand { Name = "HP" },
+                        new Brand { Name = "Sony", Slug= "sony", Description = "Marca de electrónica japonesa" },
+                        new Brand { Name = "Apple", Slug= "apple", Description = "Marca de tecnología estadounidense" },
+                        new Brand { Name = "HP", Slug= "hp", Description = "Marca de computadoras e impresoras" },
                     };
                     await context.Brands.AddRangeAsync(brands);
                     await context.SaveChangesAsync();
                     Log.Information("Marcas creadas con éxito.");
+                }
+                else
+                {
+                    //  AQUÍ: actualizar las que quedaron vacías
+                    var brandsWithoutSlug = context.Brands
+                        .Where(b => string.IsNullOrEmpty(b.Slug))
+                        .ToList();
+
+                    foreach (var b in brandsWithoutSlug)
+                    {
+                        b.Slug = GenerateSlug(b.Name);
+                    }
+
+                    if (brandsWithoutSlug.Count > 0)
+                    {
+                        await context.SaveChangesAsync();
+                        Log.Information("Marcas existentes actualizadas con slug.");
+                    }
                 }
 
                 // Creación de usuarios

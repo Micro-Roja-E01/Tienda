@@ -44,16 +44,35 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// <returns>Una tarea que representa la operación asíncrona, con la marca creada o encontrada.</returns>
         public async Task<Brand?> CreateOrGetBrandAsync(string brandName)
         {
+            var normalized = brandName.Trim();
+
             var brand = await _context.Brands
                 .AsNoTracking()
-                .FirstOrDefaultAsync(b => b.Name.ToLower() == brandName.ToLower());
+                .FirstOrDefaultAsync(b => b.Name.ToLower() == normalized.ToLower());
 
-            if (brand != null) { return brand; }
-            brand = new Brand { Name = brandName };
+            if (brand != null) 
+                return brand;
+
+            var slug = GenerateSlug(normalized);
+
+            // por si acaso ya existe una con el mismo slug (raro, pero seguro)
+            var slugExists = await _context.Brands
+                .AnyAsync(b => b.Slug.ToLower() == slug.ToLower());
+            if (slugExists)
+                slug = $"{slug}-{Guid.NewGuid().ToString("N")[..6]}";
+
+            brand = new Brand
+            {
+                Name = normalized,
+                Slug = slug,
+                Description = null
+            };
+
             await _context.Brands.AddAsync(brand);
             await _context.SaveChangesAsync();
             return brand;
         }
+
 
         /// <summary>
         /// Crea o obtiene una categoría por su nombre.
@@ -83,15 +102,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
             await _context.SaveChangesAsync();
             return newCategory;
 
-            static string GenerateSlug(string text)
-            {
-                text = text.Trim().ToLower();
-                text = text
-                    .Replace("á", "a").Replace("é", "e").Replace("í", "i")
-                    .Replace("ó", "o").Replace("ú", "u").Replace("ñ", "n");
-                text = text.Replace(" ", "-");
-                return text;
-            }
+            
         }
         /// <summary>
         /// Retorna un producto específico por su ID.
@@ -367,5 +378,15 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                 .Where(p => !p.IsAvailable)
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsAvailable, true));
         }
+        private static string GenerateSlug(string text)
+            {
+                text = text.Trim().ToLower();
+                text = text
+                    .Replace("á", "a").Replace("é", "e").Replace("í", "i")
+                    .Replace("ó", "o").Replace("ú", "u").Replace("ñ", "n");
+                text = string.Join("-", text.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+                return text;
+            }
+        
     }
 }

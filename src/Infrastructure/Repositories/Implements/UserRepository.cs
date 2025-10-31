@@ -15,7 +15,6 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
     {
         private readonly DataContext _context;
         private readonly int _daysOfDeleteUnconfirmedUsers;
-        private readonly IConfiguration configuration;
         private readonly UserManager<User> _userManager;
         private readonly IVerificationCodeRepository _verificationCodeRepository;
 
