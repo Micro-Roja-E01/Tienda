@@ -105,6 +105,14 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             cart.UpdatedAt = DateTime.UtcNow;
             _context.Carts.Update(cart);
             await _context.SaveChangesAsync();
+            // TODO: Esto lo agrego Copilot para corregir las relaciones. Habria que probar si funciona bien.
+            // Recargar el carrito con sus relaciones para que el mapeo funcione correctamente
+            await _context.Entry(cart)
+                .Collection(c => c.CartItems)
+                .Query()
+                .Include(ci => ci.Product)
+                    .ThenInclude(p => p.Images)
+                .LoadAsync();
         }
     }
 }

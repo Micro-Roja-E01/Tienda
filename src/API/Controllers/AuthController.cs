@@ -15,8 +15,15 @@ namespace Tienda.src.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
-            Log.Information("Intento de inicio de sesión para el usuario: {Email}", loginDTO.Email);
             var (token, userId) = await _userService.LoginAsync(loginDTO, HttpContext);
+            var buyerId = HttpContext.Items["BuyerId"]?.ToString();
+            // TODO: Actualizar buyerId
+            if (!string.IsNullOrEmpty(buyerId))
+            {
+                Log.Information("BuyerId encontrado en el contexto: {BuyerId}", buyerId);
+                await _cartService.AssociateWithUserAsync(buyerId, userId);
+                Log.Information("Carrito con buyerId {BuyerId} asociado al usuario con ID: {UserId}", buyerId, userId);
+            }
             return Ok(new GenericResponse<string>("Inicio de sesión exitoso", token));
         }
 

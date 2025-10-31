@@ -43,7 +43,7 @@ builder.Services.AddAuthorization();
 //Mappers
 builder.Services.AddScoped<ProductMapper>();
 builder.Services.AddScoped<UserMapper>();
-// builder.Services.AddScoped<CartMapper>(); TODO: Hay que realizar el cart mapper
+builder.Services.AddScoped<CartMapper>();
 // builder.Services.AddScoped<OrderMapper>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -117,7 +117,7 @@ builder
         options.Password.RequireNonAlphanumeric = false;
 
         //Configuración de Email
-        // options.User.RequireUniqueEmail = true;
+        options.User.RequireUniqueEmail = true;
 
         //Configuración de UserName
         options.User.AllowedUserNameCharacters =
@@ -128,7 +128,7 @@ builder
     .AddDefaultTokenProviders();
 #endregion
 
-# region Logging Configuration
+#region Logging Configuration
 builder.Host.UseSerilog(
     (context, configuration) => configuration.ReadFrom.Configuration(context.Configuration)
 );
@@ -267,6 +267,8 @@ app.MapOpenApi();
 
 // Usar Middleware para el manejo global de excepciones
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+// Usar Middleware para el manejo del carrito de compras
+app.UseMiddleware<CartMiddleware>();
 
 // Agregar autenticación y autorización
 app.UseAuthentication();
