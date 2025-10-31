@@ -60,17 +60,34 @@ namespace Tienda.src.Infrastructure.Data
                 {
                     var categories = new List<Category>
                     {
-                        new Category { Name = "Electronics" },
-                        new Category { Name = "Clothing" },
-                        new Category { Name = "Home Appliances" },
-                        new Category { Name = "Books" },
-                        new Category { Name = "Sports" },
+                        new Category { Name = "Electronics", Slug = "electronics", Description = "Electrónica y tecnología" },
+                        new Category { Name = "Clothing", Slug = "clothing", Description = "Ropa y accesorios" },
+                        new Category { Name = "Home Appliances", Slug = "home-appliances", Description = "Línea blanca y hogar" },
+                        new Category { Name = "Books", Slug = "books", Description = "Libros y lectura" },
+                        new Category { Name = "Sports", Slug = "sports", Description = "Artículos deportivos" },
                     };
                     await context.Categories.AddRangeAsync(categories);
                     await context.SaveChangesAsync();
                     Log.Information("Categorías creadas con éxito.");
                 }
+                else
+                {
+                    // 👇 AQUÍ: actualizar las que quedaron vacías
+                    var categoriesWithoutSlug = context.Categories
+                        .Where(c => string.IsNullOrEmpty(c.Slug))
+                        .ToList();
 
+                    foreach (var c in categoriesWithoutSlug)
+                    {
+                        c.Slug = GenerateSlug(c.Name);
+                    }
+
+                    if (categoriesWithoutSlug.Count > 0)
+                    {
+                        await context.SaveChangesAsync();
+                        Log.Information("Categorías existentes actualizadas con slug.");
+                    }
+                }
                 // Creación de marcas
                 if (!await context.Brands.AnyAsync())
                 {
@@ -290,6 +307,15 @@ namespace Tienda.src.Infrastructure.Data
             string firstPartNumber = faker.Random.Int(1000, 9999).ToString();
             string secondPartNumber = faker.Random.Int(1000, 9999).ToString();
             return $"+569 {firstPartNumber}{secondPartNumber}";
+        }
+        private static string GenerateSlug(string text)
+        {
+            text = text.Trim().ToLower();
+            text = text
+                .Replace("á", "a").Replace("é", "e").Replace("í", "i")
+                .Replace("ó", "o").Replace("ú", "u").Replace("ñ", "n");
+            text = string.Join("-", text.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+            return text;
         }
     }
 }

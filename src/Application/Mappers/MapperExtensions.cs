@@ -1,5 +1,6 @@
 using Mapster;
 
+
 namespace Tienda.src.Application.Mappers
 {
     /// <summary>
@@ -18,6 +19,9 @@ namespace Tienda.src.Application.Mappers
 
             var userMapper = serviceProvider.GetService<UserMapper>();
             userMapper?.ConfigureAllMappings();
+
+            var categoryMapper = serviceProvider.GetService<CategoryMapper>();
+            categoryMapper?.ConfigureAllMappings();
 
             // var cartMapper = serviceProvider.GetService<CartMapper>();
             // cartMapper?.ConfigureAllMappings();

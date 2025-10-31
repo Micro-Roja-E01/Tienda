@@ -62,17 +62,37 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// <returns>Una tarea que representa la operación asíncrona, con la categoría creada o encontrada.</returns>
         public async Task<Category?> CreateOrGetCategoryAsync(string categoryName)
         {
+            var lowerName = categoryName.Trim().ToLower();
+
             var category = await _context.Categories
                 .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Name.ToLower() == categoryName.ToLower());
+                .FirstOrDefaultAsync(c => c.Name.ToLower() == lowerName);
 
-            if (category != null) { return category; }
-            category = new Category { Name = categoryName };
-            await _context.Categories.AddAsync(category);
+            if (category != null)
+                return category;
+
+            // crear nueva categoría con slug
+            var newCategory = new Category
+            {
+                Name = categoryName.Trim(),
+                Slug = GenerateSlug(categoryName),
+                Description = null
+            };
+
+            await _context.Categories.AddAsync(newCategory);
             await _context.SaveChangesAsync();
-            return category;
-        }
+            return newCategory;
 
+            static string GenerateSlug(string text)
+            {
+                text = text.Trim().ToLower();
+                text = text
+                    .Replace("á", "a").Replace("é", "e").Replace("í", "i")
+                    .Replace("ó", "o").Replace("ú", "u").Replace("ñ", "n");
+                text = text.Replace(" ", "-");
+                return text;
+            }
+        }
         /// <summary>
         /// Retorna un producto específico por su ID.
         /// </summary>
