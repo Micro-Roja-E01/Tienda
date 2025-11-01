@@ -81,6 +81,17 @@ namespace Tienda.src.API.Controllers
             return Created($"/api/product/{result}", new GenericResponse<string>("Producto creado exitosamente", result));
         }
 
+        /// <summary>
+        /// Crea un nuevo producto con archivos de imagen que se subirán a Cloudinary
+        /// </summary>
+        [HttpPost("admin/create-with-files")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateProductWithFilesAsync([FromForm] CreateProductDTO createProductDTO)
+        {
+            var result = await _productService.CreateProductAsync(createProductDTO);
+            return Created($"/api/product/{result}", new GenericResponse<string>("Producto creado exitosamente con imágenes subidas a Cloudinary", result));
+        }
+
         [HttpPatch("admin/{id}/toggle-availability")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ToggleAvailabilityAsync(int id)
