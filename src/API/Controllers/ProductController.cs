@@ -91,6 +91,43 @@ namespace Tienda.src.API.Controllers
             var result = await _productService.GetByIdForAdminAsync(productId);
             return Ok(new GenericResponse<ProductDetailDTO>("Producto obtenido exitosamente", result));
         }
-        
+
+        [HttpPost("admin/create")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateProductAsync([FromBody] CreateProductJsonDTO createProductDTO)
+        {
+            var result = await _productService.CreateProductJsonAsync(createProductDTO);
+            return Created($"/api/product/{result}", new GenericResponse<string>("Producto creado exitosamente", result));
+        }
+
+        /// <summary>
+        /// Crea un nuevo producto con archivos de imagen que se subirán a Cloudinary
+        /// </summary>
+        [HttpPost("admin/create-with-files")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateProductWithFilesAsync([FromForm] CreateProductDTO createProductDTO)
+        {
+            var result = await _productService.CreateProductAsync(createProductDTO);
+            return Created($"/api/product/{result}", new GenericResponse<string>("Producto creado exitosamente con imágenes subidas a Cloudinary", result));
+        }
+
+        [HttpPatch("admin/{id}/toggle-availability")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ToggleAvailabilityAsync(int id)
+        {
+            await _productService.ToggleActiveAsync(id);
+            return Ok(new GenericResponse<string>("Disponibilidad del producto cambiada exitosamente", $"La disponibilidad del producto con ID {id} ha sido cambiada."));
+        }
+
+        /// <summary>
+        /// Endpoint temporal para activar todos los productos (solo para desarrollo)
+        /// </summary>
+        [HttpPost("admin/activate-all")]
+        [AllowAnonymous] // Temporal para facilitar el uso
+        public async Task<IActionResult> ActivateAllProductsAsync()
+        {
+            await _productService.ActivateAllProductsAsync();
+            return Ok(new GenericResponse<string>("Todos los productos han sido activados", "Operación completada exitosamente"));
+        }
     }
 }

@@ -206,6 +206,13 @@ builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
+// Inicializar mapeos de Mapster
+using (var scope = app.Services.CreateScope())
+{
+    var productMapper = scope.ServiceProvider.GetRequiredService<ProductMapper>();
+    productMapper.ConfigureAllMappings();
+}
+
 app.UseHangfireDashboard(
     builder.Configuration["HangfireDashboard:DashboardPath"]
         ?? throw new InvalidOperationException("La ruta de hangfire no ha sido declarada."),
