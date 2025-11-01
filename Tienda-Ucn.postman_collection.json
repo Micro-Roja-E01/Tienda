@@ -1,0 +1,370 @@
+{
+	"info": {
+		"_postman_id": "6cea0baa-1cbb-4442-8cf5-5c5d982e4177",
+		"name": "Tienda-Ucn",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45336862",
+		"_collection_link": "https://sebastian-1581228.postman.co/workspace/Sebastian's-Workspace~35e034d5-5804-4f45-8607-bf312ebcfbfd/collection/45336862-6cea0baa-1cbb-4442-8cf5-5c5d982e4177?action=share&source=collection_link&creator=45336862"
+	},
+	"item": [
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "GetAdmin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjEyNDk0NTZ9.4omFkfA0sWMQL8LvoF2r_O_QdJztJSoMKiaMnTRa99E",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NTk3MTc1ODR9.DTUQ23saG1kIBu_nIDHYHLAMh1JmpTJ9ttr1UUH2qx4",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/admin/products?PageNumber=5&PageSize=1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"products"
+							],
+							"query": [
+								{
+									"key": "PageNumber",
+									"value": "5"
+								},
+								{
+									"key": "PageSize",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCostumers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/costumer/products/51",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"costumer",
+								"products",
+								"51"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Toogle Avaliabilty",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NTk3MjE1Mzl9.gQ29C9Ju2gpQVsP4tYSc3Xz9Ma1gIuLT4jv9r6UW-_I",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/admin/51/toggle-availability",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"51",
+								"toggle-availability"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Creat Cloud",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjIwMzI2MDl9.JFBfC4qT0YcetGqGB-OHfBQJMCnlsxTJl3gUZjt3pdQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Portátil Ultraligero X1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Portátil de 14\" con 16GB RAM y SSD de 512GB",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "1200",
+									"type": "text"
+								},
+								{
+									"key": "stock",
+									"value": "25",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "Nuevo",
+									"type": "text"
+								},
+								{
+									"key": "categoryName",
+									"value": "Computadoras",
+									"type": "text"
+								},
+								{
+									"key": "brandName",
+									"value": "TechCorp",
+									"type": "text"
+								},
+								{
+									"key": "images",
+									"type": "file",
+									"src": "/C:/Users/sebas/Downloads/1735573186365-67b47f0494754b45d2359e6ea9c7cdd1b10c8c39_521984b0_thumbnail_51.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL}}/admin/create-with-files",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"create-with-files"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create JSon",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjE2OTUwNzh9.7ujVmQVE1PpNd_9l6QAROV8hgc_MXYqyYdOjI3qBpAI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Producto JSON\",\r\n  \"description\": \"Con imágenes externas\",\r\n  \"price\": 150,\r\n  \"stock\": 30,\r\n  \"status\": \"Nuevo\",\r\n  \"categoryName\": \"Electrónicos\",\r\n  \"brandName\": \"Samsung S9\",\r\n  \"imageUrls\": [\r\n    {\r\n      \"url\": \"https://i.blogs.es/80940b/gs9/450_1000.png\",\r\n      \"alt\": \"Samsung S9\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/admin/create",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"create"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "LoginCostumer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"sebastian.galvez02@alumnos.ucn.cl\",\r\n    \"password\": \"Hola1234!\",\r\n    \"remembertMe\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/auth/login",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LoginAdmin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"matiassotocarvajal@gmail.com\",\r\n    \"password\": \"Contrasena1\",\r\n    \"remembertMe\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/auth/login",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"sebastian.galvez02@alumnos.ucn.cl\",\r\n    \"password\": \"Hola1234!\",\r\n    \"confirmPassword\": \"Hola1234!\",\r\n    \"rut\": \"21834204-3\",\r\n    \"firstName\": \"Sebastian\",\r\n    \"lastName\": \"Galvez\",\r\n    \"birthDate\": \"2005-05-05\",\r\n    \"phoneNumber\": \"963714110\",\r\n    \"gender\": \"Masculino\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/auth/register",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"sebastian.galvez02@alumnos.ucn.cl\",\r\n    \"verificationCode\": \"433292\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/auth/verify",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"auth",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "URL",
+			"value": ""
+		}
+	]
+}
