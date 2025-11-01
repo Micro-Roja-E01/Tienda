@@ -118,11 +118,20 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return await _userManager.FindByIdAsync(id.ToString());
         }
 
-        // TODO: Terminar implementacion de funciones de abajo
-        public Task<User?> GetByRutAsync(string rut, bool trackChanges = false)
+        
+        public async Task<User?> GetByRutAsync(string rut, bool trackChanges = false)
         {
-            throw new NotImplementedException();
+            if (trackChanges)
+            {
+                return await _context.Users
+                    .FirstOrDefaultAsync(u => u.Rut == rut);
+            }
+
+            return await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Rut == rut);
         }
+
 
         public async Task<string> GetUserRoleAsync(User user)
         {
@@ -149,5 +158,32 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             Log.Warning($"Error al actualizar contraseña para {user.Email}: {errors}");
             throw new InvalidOperationException($"No se pudo actualizar la contraseña: {errors}");
         }
+        public async Task<bool> EmailExistsForOtherUserAsync(string email, int currentUserId)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.Email == email && u.Id != currentUserId);
+        }
+
+        public async Task<bool> RutExistsForOtherUserAsync(string rut, int currentUserId)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.Rut == rut && u.Id != currentUserId);
+        }
+
+        public async Task<bool> UpdateProfileAsync(User user)
+        {
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                Log.Information("Perfil actualizado para usuario {UserId}", user.Id);
+                return true;
+            }
+
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            Log.Warning("Error al actualizar perfil de usuario {UserId}: {Errors}", user.Id, errors);
+            throw new InvalidOperationException($"No se pudo actualizar el perfil: {errors}");
+        }
     }
+    
 }

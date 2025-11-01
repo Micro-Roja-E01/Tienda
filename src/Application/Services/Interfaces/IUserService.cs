@@ -1,4 +1,9 @@
 using Tienda.src.Application.DTO.AuthDTO;
+using Tienda.src.Application.DTO.UserDTO;
+
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+
 
 namespace Tienda.src.Application.Services.Interfaces
 {
@@ -13,5 +18,12 @@ namespace Tienda.src.Application.Services.Interfaces
         Task<int> DeleteUnconfirmedAsync();
         Task<string> RecoverPasswordAsync(RecoverPasswordDTO recoverPasswordDTO);
         Task<string> ResetPasswordAsync(ResetPasswordDTO resetPasswordDTO);
+
+        Task<UserProfileDTO> GetProfileAsync(int userId);
+        
+        Task<UserProfileDTO> UpdateProfileAsync(int userId, UpdateProfileDTO dto);
+
+        Task ChangePasswordAsync(int userId, ChangePasswordDTO dto, HttpContext httpContext);
+
     }
 }

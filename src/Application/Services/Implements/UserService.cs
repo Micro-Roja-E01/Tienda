@@ -5,6 +5,8 @@ using Tienda.src.Application.DTO;
 using Tienda.src.Application.DTO.AuthDTO;
 using Tienda.src.Application.Services.Interfaces;
 using Tienda.src.Infrastructure.Repositories.Interfaces;
+using Tienda.src.Application.DTO.UserDTO;
+
 
 namespace Tienda.src.Application.Services.Implements
 {
@@ -334,109 +336,288 @@ namespace Tienda.src.Application.Services.Implements
 
         public async Task<string> ResetPasswordAsync(ResetPasswordDTO resetPasswordDTO)
         {
-            User? user = await _userRepository.GetByEmailAsync(resetPasswordDTO.Email);
+            // 1. Buscar usuario por email
+            var user = await _userRepository.GetByEmailAsync(resetPasswordDTO.Email);
             if (user == null)
             {
-                Log.Warning($"El usuario con el correo {resetPasswordDTO.Email} no existe.");
+                Log.Warning("ResetPassword: usuario {Email} no existe", resetPasswordDTO.Email);
                 throw new KeyNotFoundException("El usuario no existe.");
             }
-            CodeType codeType = CodeType.PasswordChange;
 
-            VerificationCode? verificationCode =
-                await _verificationCodeRepository.GetLatestByUserIdAsync(user.Id, codeType);
+            var codeType = CodeType.PasswordChange;
+
+            // 2. Obtener el último código asociado a usuario
+            var verificationCode = await _verificationCodeRepository.GetLatestByUserIdAsync(user.Id, codeType);
             if (verificationCode == null)
             {
-                Log.Warning(
-                    $"No se encontró un código de verificación para el usuario: {resetPasswordDTO.Email}"
-                );
+                Log.Warning("ResetPassword: no hay código registrado para {Email}", resetPasswordDTO.Email);
                 throw new KeyNotFoundException("El código de verificación no existe.");
             }
-            // TODO: La logica de verificación del código se repite en VerifyEmailAsync y ResetPasswordAsync, considerar extraerla a un método separado.
-            if (
-                verificationCode.Code != resetPasswordDTO.RecoveryCode
-                || DateTime.UtcNow >= verificationCode.ExpiryDate
-            )
+
+            bool codeMatch = verificationCode.Code == resetPasswordDTO.RecoveryCode;
+            bool codeExpired = DateTime.UtcNow >= verificationCode.ExpiryDate;
+
+            if (!codeMatch || codeExpired)
             {
-                int attempsCountUpdated = await _verificationCodeRepository.IncreaseAttemptsAsync(
+                
+                int attemptsCountUpdated = await _verificationCodeRepository.IncreaseAttemptsAsync(
                     user.Id,
                     codeType
                 );
+
                 Log.Warning(
-                    $"Código de verificación incorrecto o expirado para el usuario: {resetPasswordDTO.Email}. Intentos actuales: {attempsCountUpdated}"
+                    "ResetPassword: código inválido/expirado para {Email}. Expirado={Expired} Intentos={Attempts}",
+                    resetPasswordDTO.Email,
+                    codeExpired,
+                    attemptsCountUpdated
                 );
-                if (attempsCountUpdated >= 5)
+
+               
+                if (attemptsCountUpdated >= 5)
                 {
                     Log.Warning(
-                        $"Se ha alcanzado el límite de intentos para el usuario: {resetPasswordDTO.Email}"
+                        "ResetPassword: límite de intentos alcanzado para {Email}. Eliminando usuario...",
+                        resetPasswordDTO.Email
                     );
+
                     bool codeDeleteResult = await _verificationCodeRepository.DeleteByUserIdAsync(
                         user.Id,
                         codeType
                     );
+
                     if (codeDeleteResult)
                     {
                         Log.Warning(
-                            $"Se ha eliminado el código de verificación para el usuario: {resetPasswordDTO.Email}"
+                            "ResetPassword: código eliminado para {Email} tras demasiados intentos",
+                            resetPasswordDTO.Email
                         );
+
                         bool userDeleteResult = await _userRepository.DeleteAsync(user.Id);
                         if (userDeleteResult)
                         {
-                            Log.Warning($"Se ha eliminado el usuario: {resetPasswordDTO.Email}");
+                            Log.Warning(
+                                "ResetPassword: usuario {Email} eliminado tras demasiados intentos fallidos",
+                                resetPasswordDTO.Email
+                            );
                             throw new ArgumentException(
-                                "Se ha alcanzado el límite de intentos. El usuario ha sido eliminado."
+                                "Se alcanzó el límite de intentos fallidos. La cuenta ha sido eliminada."
                             );
                         }
                     }
-                }
-                if (DateTime.UtcNow >= verificationCode.ExpiryDate)
-                {
-                    Log.Warning(
-                        $"El código de verificación ha expirado para el usuario: {resetPasswordDTO.Email}"
+
+                    
+                    throw new ArgumentException(
+                        "Se alcanzó el límite de intentos fallidos. La cuenta ha sido bloqueada."
                     );
+                }
+
+               
+                if (codeExpired)
+                {
                     throw new ArgumentException("El código de verificación ha expirado.");
                 }
-                else
-                {
-                    Log.Warning(
-                        $"El código de verificación es incorrecto para el usuario: {resetPasswordDTO.Email}"
-                    );
-                    throw new ArgumentException(
-                        $"El código de verificación es incorrecto, quedan {5 - attempsCountUpdated} intentos."
-                    );
-                }
+
+                // código incorrecto pero no expirado
+                int intentosRestantes = 5 - attemptsCountUpdated;
+                throw new ArgumentException(
+                    $"El código de verificación es incorrecto. Quedan {intentosRestantes} intentos."
+                );
             }
 
-            // Cambiar la contraseña del usuario
+            // 3. Código válido, actualizar la contraseña
             bool passwordReset = await _userRepository.UpdatePasswordAsync(
                 user,
                 resetPasswordDTO.NewPassword
             );
 
-            if (passwordReset)
+            if (!passwordReset)
             {
-                // Eliminar el código de verificación después del uso exitoso
-                bool codeDeleteResult = await _verificationCodeRepository.DeleteByUserIdAsync(
-                    user.Id,
-                    codeType
-                );
-                if (codeDeleteResult)
-                {
-                    Log.Information(
-                        $"Se ha eliminado el código de verificación para el usuario: {resetPasswordDTO.Email}"
-                    );
-                }
-
-                Log.Information(
-                    $"La contraseña del usuario {resetPasswordDTO.Email} ha sido restablecida exitosamente."
-                );
-                // TODO: Hacer que envie un correo notificando el cambio de contraseña
-                return "¡La contraseña ha sido restablecida exitosamente!";
+                Log.Error("ResetPassword: error al actualizar contraseña para {Email}", resetPasswordDTO.Email);
+                throw new Exception("Error al restablecer la contraseña.");
             }
 
-            Log.Error(
-                $"Error al restablecer la contraseña para el usuario: {resetPasswordDTO.Email}"
+            // 4. Limpiar el código usado
+            bool deleted = await _verificationCodeRepository.DeleteByUserIdAsync(user.Id, codeType);
+            if (deleted)
+            {
+                Log.Information(
+                    "ResetPassword: código eliminado tras uso correcto para {Email}",
+                    resetPasswordDTO.Email
+                );
+            }
+
+            Log.Information(
+                "ResetPassword: contraseña restablecida exitosamente para {Email}",
+                resetPasswordDTO.Email
             );
-            throw new Exception("Error al restablecer la contraseña.");
+
+            // await _emailService.SendPasswordChangedConfirmationEmailAsync(user.Email!);
+
+            return "¡La contraseña ha sido restablecida exitosamente!";
         }
+
+
+        public async Task<UserProfileDTO> GetProfileAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId)
+                ?? throw new KeyNotFoundException("Usuario no encontrado.");
+
+            Log.Information("Obteniendo perfil para usuario {UserId}", userId);
+
+            var profile = new UserProfileDTO
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Gender = user.Gender.ToString(), // enum -> "Masculino"/"Femenino"/"Otro"
+                BirthDate = user.BirthDate,
+                Rut = user.Rut,
+                Email = user.Email!,
+                PhoneNumber = user.PhoneNumber!,
+                RegisteredAt = user.RegisteredAt,
+                UpdatedAt = user.UpdatedAt
+            };
+
+            return profile;
+        }
+        public async Task<UserProfileDTO> UpdateProfileAsync(int userId, UpdateProfileDTO dto)
+        {
+            // 1. Buscar el usuario actual
+            var user = await _userRepository.GetByIdAsync(userId)
+                ?? throw new KeyNotFoundException("Usuario no encontrado.");
+
+            Log.Information("Usuario {UserId} solicita actualización de perfil", userId);
+
+            // 2. Validar unicidad del RUT si cambió
+            if (!string.Equals(user.Rut, dto.Rut, StringComparison.OrdinalIgnoreCase))
+            {
+                var rutEnUso = await _userRepository.RutExistsForOtherUserAsync(dto.Rut, userId);
+                if (rutEnUso)
+                {
+                    // rúbrica: las validaciones de edición deben incluir unicidad de rut
+                    throw new InvalidOperationException("El RUT ya está en uso por otro usuario.");
+                }
+            }
+
+            // 3. Validar unicidad del Email si cambió
+            bool emailCambio = !string.Equals(user.Email, dto.Email, StringComparison.OrdinalIgnoreCase);
+            if (emailCambio)
+            {
+                var emailEnUso = await _userRepository.EmailExistsForOtherUserAsync(dto.Email, userId);
+                if (emailEnUso)
+                {
+                    throw new InvalidOperationException("El correo electrónico ya está en uso por otro usuario.");
+                }
+
+                
+                string verificationCode = GenerarCodigoDe6Digitos();
+
+               
+                var expiryMinutes = _verificationCodeExpirationTimeInMinutes;
+
+                var codeEntity = new VerificationCode
+                {
+                    UserId = user.Id,
+                    Code = verificationCode,
+                    CodeType = CodeType.EmailVerification,
+                    AttemptCount = 0,
+                    ExpiryDate = DateTime.UtcNow.AddMinutes(expiryMinutes),
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                await _verificationCodeRepository.CreateAsync(codeEntity);
+
+                // Enviamos el código AL NUEVO EMAIL que quiere usar
+                await _emailService.SendVerificationCodeEmailAsync(
+                    dto.Email,
+                    verificationCode
+                );
+
+                Log.Information(
+                    "Usuario {UserId} solicitó cambio de email de {OldEmail} a {NewEmail}. Código enviado.",
+                    userId,
+                    user.Email,
+                    dto.Email
+                );
+
+                // Nota importante:
+                // No cambiamos aún user.Email, porque debe confirmar ese código.
+               
+            }
+
+            // 4. Actualizar campos normales del perfil
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+
+            // Convertir string ("Masculino"/"Femenino"/"Otro") a enum Gender
+            user.Gender = Enum.Parse<Gender>(dto.Gender, ignoreCase: true);
+
+            user.BirthDate = dto.BirthDate;
+            user.Rut = dto.Rut;
+            user.PhoneNumber = dto.PhoneNumber;
+
+            // Si el email NO cambió, se puede mantener sincronizado Email/UserName
+            if (!emailCambio)
+            {
+                user.Email = dto.Email;
+                user.UserName = dto.Email;
+            }
+
+            user.UpdatedAt = DateTime.UtcNow;
+
+            // 5. Guardar cambios 
+            await _userRepository.UpdateProfileAsync(user);
+
+            Log.Information("Perfil de usuario {UserId} actualizado correctamente", userId);
+
+            // 6. Respuesta de vuelta al cliente
+            var response = new UserProfileDTO
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Gender = user.Gender.ToString(),
+                BirthDate = user.BirthDate,
+                Rut = user.Rut,
+                Email = user.Email!, // si pidió cambiar email, este es el viejo hasta que verifique
+                PhoneNumber = user.PhoneNumber!,
+                RegisteredAt = user.RegisteredAt,
+                UpdatedAt = user.UpdatedAt
+            };
+
+            return response;
+        }
+
+        public async Task ChangePasswordAsync(int userId, ChangePasswordDTO dto, HttpContext httpContext)
+        {
+            // 1. Obtener el usuario
+            var user = await _userRepository.GetByIdAsync(userId)
+                ?? throw new KeyNotFoundException("Usuario no encontrado.");
+
+            // 2. Validar contraseña actual
+            var passOk = await _userRepository.CheckPasswordAsync(user, dto.CurrentPassword);
+            if (!passOk)
+            {
+                // nuestro middleware mapea UnauthorizedAccessException a 401
+                throw new UnauthorizedAccessException("La contraseña actual es incorrecta.");
+            }
+
+            // 3. Actualizar contraseña 
+            await _userRepository.UpdatePasswordAsync(user, dto.NewPassword);
+
+            Log.Information(
+                "Usuario {UserId} cambió su contraseña desde la IP {IpAddress}",
+                userId,
+                httpContext.Connection.RemoteIpAddress?.ToString()
+            );
+
+        }
+        private static string GenerarCodigoDe6Digitos()
+        {
+            var random = new Random();
+            int num = random.Next(0, 1000000); 
+            return num.ToString("D6"); 
+        }
+
+
+
     }
 }

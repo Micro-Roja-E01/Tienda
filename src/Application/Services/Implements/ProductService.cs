@@ -8,6 +8,7 @@ using tienda.src.Infrastructure.Repositories.Interfaces;
 using Tienda.src.Application.Domain.Models;
 using Tienda.src.Application.DTO.ProductDTO;
 
+
 namespace Tienda.src.Application.Services.Implements
 {
     /// <summary>
@@ -165,14 +166,46 @@ namespace Tienda.src.Application.Services.Implements
 
         public async Task<ProductDetailDTO> GetByIdForCostumerAsync(int productId)
         {
-            var product = await _productRepository.GetByIdAsync(productId) ?? throw new KeyNotFoundException($"Producto con ID {productId} no encontrado.");
-            Log.Information("Producto obtenido para el cliente: {@Product}", product);
-            return product.Adapt<ProductDetailDTO>();
-        }
+            var product = await _productRepository.GetByIdAsync(productId)
+                ?? throw new KeyNotFoundException($"Producto con ID {productId} no encontrado.");
 
+            // Map básico
+            var dto = product.Adapt<ProductDetailDTO>();
+
+            
+            var discountPct = product.Discount; 
+            var priceCLP    = product.Price;    
+            var discountVal = (int)Math.Ceiling(priceCLP * (discountPct / 100.0));
+            var finalPrice  = Math.Max(0, priceCLP - discountVal);
+
+            // Poblar imágenes
+            var fallback = _configuration["Products:DefaultImageUrl"]
+                        ?? "https://shop.songprinting.com/global/images/PublicShop/ProductSearch/prodgr_default_300.png";
+
+            var urls = product.Images?.OrderBy(i => i.CreatedAt)
+                                    .Select(i => i.ImageUrl)
+                                    .Where(u => !string.IsNullOrWhiteSpace(u))
+                                    .ToList() ?? new List<string>();
+
+            dto.MainImageURL = urls.FirstOrDefault() ?? fallback;
+           
+            dto.ImageUrls = urls.Count > 0 ? urls : new List<string> { dto.MainImageURL };
+
+
+            dto.FinalPrice = finalPrice;
+            dto.DiscountPercentage = discountPct;
+
+            //indicador de stock en detalle
+            int fewUnits = int.Parse(_configuration["Products:FewUnitsAvailable"] ?? "5");
+            dto.StockIndicator = product.Stock <= 0 ? "Sin stock"
+                            : product.Stock <= fewUnits ? "Últimas unidades"
+                            : "";
+
+            return dto;
+        }
         public async Task<ProductDetailDTO> GetByIdForAdminAsync(int productId)
         {
-            var product = await _productRepository.GetByIdAsync(productId) ?? throw new KeyNotFoundException($"Producto con ID {productId} no encontrado.");
+            var product = await _productRepository.GetByIdForAdminAsync(productId) ?? throw new KeyNotFoundException($"Producto con ID {productId} no encontrado.");
             Log.Information("Producto obtenido para el administrador: {@Product}", product);
             return product.Adapt<ProductDetailDTO>();
         }
@@ -203,7 +236,7 @@ namespace Tienda.src.Application.Services.Implements
                     TotalCount = totalCount,
                     TotalPages = totalPages,
                     CurrentPage = currentPage,
-                    PageSize = products.Count()
+                    PageSize = pageSize
                 };
             }
             catch (ArgumentOutOfRangeException ex)
@@ -224,42 +257,22 @@ namespace Tienda.src.Application.Services.Implements
             {
                 Log.Information("Obteniendo productos para cliente con parámetros de búsqueda: {@SearchParams}", searchParams);
 
-                var (products, totalCount) = await _productRepository.GetFilteredForCustomerAsync(searchParams);
+                var (items, totalCount) = await _productRepository.GetFilteredForCustomerAsync(searchParams);
+
                 int currentPage = searchParams.PageNumber ?? 1;
-                int pageSize = searchParams.PageSize ?? _defaultPageSize;
-                var totalPages = totalCount == 0 ? 1 : (int)Math.Ceiling((double)totalCount / (double)pageSize);
+                int pageSize    = searchParams.PageSize   ?? _defaultPageSize;
+                int totalPages  = totalCount == 0 ? 1 : (int)Math.Ceiling(totalCount / (double)pageSize);
 
-                // Si no hay productos, devolvemos una respuesta vacía válida
-                if (totalCount == 0)
-                {
-                    Log.Information("No se encontraron productos con los parámetros de búsqueda proporcionados");
-                    return new ListedProductsForCostumerDTO
-                    {
-                        Products = new List<ProductForCostumerDTO>(),
-                        TotalCount = 0,
-                        CurrentPage = currentPage,
-                        PageSize = pageSize,
-                        TotalPages = 1
-                    };
-                }
-
-                // Validar rango de página solo cuando hay productos
-                if (currentPage < 1 || currentPage > totalPages)
-                {
+                if (totalCount > 0 && (currentPage < 1 || currentPage > totalPages))
                     throw new ArgumentOutOfRangeException("El número de página está fuera de rango.");
-                }
 
-                Log.Information("Total de productos encontrados: {TotalCount}, Total de páginas: {TotalPages}, Página actual: {CurrentPage}, Tamaño de página: {PageSize}",
-                    totalCount, totalPages, currentPage, pageSize);
-
-                // Convertimos los productos filtrados a DTOs para la respuesta
                 return new ListedProductsForCostumerDTO
                 {
-                    Products = products.Adapt<List<ProductForCostumerDTO>>(),
+                    Products   = items.ToList(),       // ProductForCostumerDTO
                     TotalCount = totalCount,
                     TotalPages = totalPages,
-                    CurrentPage = currentPage,
-                    PageSize = pageSize
+                    CurrentPage= currentPage,
+                    PageSize   = pageSize
                 };
             }
             catch (ArgumentOutOfRangeException ex)
