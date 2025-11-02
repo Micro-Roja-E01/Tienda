@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Tienda.src.Application.Domain.Models;
+using Tienda.src.Application.DTO.AdminUserDTO;
 
 namespace Tienda.src.Infrastructure.Repositories.Interfaces
 {
@@ -30,5 +31,13 @@ namespace Tienda.src.Infrastructure.Repositories.Interfaces
 
         // NUEVO: guardar cambios de perfil (nombre, rut, etc.)
         Task<bool> UpdateProfileAsync(User user);
+
+        // NUEVOS para flujo 9
+        Task<(List<User> users, Dictionary<int,string> roles, int totalCount)> GetPagedForAdminAsync(AdminUserSearchParamsDTO search);
+        Task<(User user, string role)?> GetByIdWithRoleAsync(int userId);
+        Task<int> CountAdminsAsync();
+        Task UpdateStatusAsync(User user, UserStatus status);
+        Task UpdateRoleAsync(User user, string roleName);
+        Task UpdateLastLoginAtAsync(User user);
     }
 }

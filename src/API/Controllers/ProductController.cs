@@ -4,10 +4,11 @@ using tienda.src.Application.DTO.ProductDTO;
 using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 using tienda.src.Application.Services.Interfaces;
 using Tienda.src.Application.DTO;
+using Tienda.src.Application.DTO.ProductDTO;
 
 namespace Tienda.src.API.Controllers
 {
-    // 👇 ojo: este prefix es correcto
+    
     [Route("api")]
     public class ProductController : BaseController
     {

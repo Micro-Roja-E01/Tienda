@@ -13,6 +13,13 @@ namespace Tienda.src.Application.Domain.Models
         Otro,
     }
 
+    // para el flujo 9
+    public enum UserStatus
+    {
+        Active,
+        Blocked
+    }
+
     public class User : IdentityUser<int>
     {
         public required string Rut { get; set; }
@@ -20,9 +27,14 @@ namespace Tienda.src.Application.Domain.Models
         public required string LastName { get; set; }
         public required Gender Gender { get; set; }
         public required DateTime BirthDate { get; set; }
+
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        // TODO: Esto está bien? Revisar
+
+        // campos para flujo 9
+        public UserStatus Status { get; set; } = UserStatus.Active;
+        public DateTime? LastLoginAt { get; set; }
+
         public ICollection<VerificationCode> VerificationCodes { get; set; } = new List<VerificationCode>();
     }
 }

@@ -6,6 +6,7 @@ using Tienda.src.Application.DTO.AuthDTO;
 using Tienda.src.Application.Services.Interfaces;
 using Tienda.src.Infrastructure.Repositories.Interfaces;
 using Tienda.src.Application.DTO.UserDTO;
+using Tienda.src.Application.DTO.AdminUserDTO;
 
 
 namespace Tienda.src.Application.Services.Implements
@@ -39,9 +40,9 @@ namespace Tienda.src.Application.Services.Implements
             );
         }
 
-        public Task<int> DeleteUnconfirmedAsync()
+        public async Task<int> DeleteUnconfirmedAsync()
         {
-            throw new NotImplementedException();
+            return await _userRepository.DeleteUnconfirmedAsync();
         }
 
         public async Task<(string token, int userId)> LoginAsync(
@@ -76,8 +77,11 @@ namespace Tienda.src.Application.Services.Implements
             string roleName = await _userRepository.GetUserRoleAsync(user);
             Log.Information(
                 $"Inicio de sesión exitoso para el usuario: {loginDTO.Email} desde la IP: {ipAddress}"
+                
             );
+            
             var token = _tokenService.GenerateToken(user, roleName, loginDTO.RememberMe);
+            await _userRepository.UpdateLastLoginAtAsync(user);
             return (token, user.Id);
         }
 
@@ -101,8 +105,7 @@ namespace Tienda.src.Application.Services.Implements
                 throw new InvalidOperationException("El RUT ya está registrado.");
             }
             var user = registerDTO.Adapt<User>();
-            // Por alguna razon, mapea todo menos el username.
-            user.UserName = registerDTO.Email;
+            user.UserName ??= registerDTO.Email;
             var result = await _userRepository.CreateAsync(user, registerDTO.Password);
             if (!result)
             {
@@ -137,9 +140,7 @@ namespace Tienda.src.Application.Services.Implements
             return "Se ha enviado un código de verificación a su correo electrónico.";
         }
 
-        public async Task<string> ResendEmailVerificationCodeAsync(
-            ResendEmailVerificationCodeDTO resendEmailVerificationCodeDTO
-        )
+        public async Task<string> ResendEmailVerificationCodeAsync(ResendEmailVerificationCodeDTO resendEmailVerificationCodeDTO)
         {
             var currentTime = DateTime.UtcNow;
             User? user = await _userRepository.GetByEmailAsync(
@@ -493,7 +494,7 @@ namespace Tienda.src.Application.Services.Implements
                 var rutEnUso = await _userRepository.RutExistsForOtherUserAsync(dto.Rut, userId);
                 if (rutEnUso)
                 {
-                    // rúbrica: las validaciones de edición deben incluir unicidad de rut
+                    
                     throw new InvalidOperationException("El RUT ya está en uso por otro usuario.");
                 }
             }
@@ -539,8 +540,7 @@ namespace Tienda.src.Application.Services.Implements
                     dto.Email
                 );
 
-                // Nota importante:
-                // No cambiamos aún user.Email, porque debe confirmar ese código.
+                
                
             }
 
@@ -596,7 +596,7 @@ namespace Tienda.src.Application.Services.Implements
             var passOk = await _userRepository.CheckPasswordAsync(user, dto.CurrentPassword);
             if (!passOk)
             {
-                // nuestro middleware mapea UnauthorizedAccessException a 401
+                
                 throw new UnauthorizedAccessException("La contraseña actual es incorrecta.");
             }
 
@@ -610,13 +610,109 @@ namespace Tienda.src.Application.Services.Implements
             );
 
         }
+        public async Task<PagedAdminUsersDTO> GetAllForAdminAsync(AdminUserSearchParamsDTO search)
+        {
+            var (users, rolesDict, totalCount) = await _userRepository.GetPagedForAdminAsync(search);
+
+            var dtoList = users.Select(u => new AdminUserListItemDTO
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email!,
+                Role = rolesDict.TryGetValue(u.Id, out var r) ? r : "Cliente",
+                Status = u.Status.ToString(),
+                RegisteredAt = u.RegisteredAt,
+                LastLoginAt = u.LastLoginAt
+            }).ToList();
+
+            int totalPages = (int)Math.Ceiling((double)totalCount / search.PageSize);
+
+            return new PagedAdminUsersDTO
+            {
+                Users = dtoList,
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                CurrentPage = search.Page,
+                PageSize = search.PageSize
+            };
+        }
+        public async Task<AdminUserDetailDTO> GetByIdForAdminAsync(int userId)
+        {
+            var (user, role) = await _userRepository.GetByIdWithRoleAsync(userId)
+                ?? throw new KeyNotFoundException("El usuario no existe.");
+
+            return new AdminUserDetailDTO
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email!,
+                Rut = user.Rut,
+                Role = role,
+                Status = user.Status.ToString(),
+                PhoneNumber = user.PhoneNumber,
+                RegisteredAt = user.RegisteredAt,
+                UpdatedAt = user.UpdatedAt,
+                LastLoginAt = user.LastLoginAt
+            };
+        }
+
+        public async Task UpdateStatusForAdminAsync(int targetUserId, int adminId, UpdateUserStatusDTO dto)
+        {
+            // 1. no me puedo bloquear a mí mismo
+            if (targetUserId == adminId)
+                throw new InvalidOperationException("No puedes cambiar tu propio estado.");
+
+            // 2. obtener usuario
+            var (user, role) = await _userRepository.GetByIdWithRoleAsync(targetUserId)
+                ?? throw new KeyNotFoundException("El usuario no existe.");
+
+            // 3. si es admin y lo quiero BLOQUEAR → verificar que no sea el único
+            if (role == "Admin" && dto.Status == "blocked")
+            {
+                int adminCount = await _userRepository.CountAdminsAsync();
+                if (adminCount <= 1)
+                    throw new InvalidOperationException("No puedes bloquear al último administrador.");
+            }
+
+            // 4. aplicar estado
+            var newStatus = dto.Status == "active" ? UserStatus.Active : UserStatus.Blocked;
+            await _userRepository.UpdateStatusAsync(user, newStatus);
+
+
+        }
+
+        public async Task UpdateRoleForAdminAsync(int targetUserId, int adminId, UpdateUserRoleDTO dto)
+        {
+            // 1. no me puedo degradar a mí mismo
+            if (targetUserId == adminId)
+                throw new InvalidOperationException("No puedes modificar tu propio rol desde aquí.");
+
+            var (user, currentRole) = await _userRepository.GetByIdWithRoleAsync(targetUserId)
+                ?? throw new KeyNotFoundException("El usuario no existe.");
+
+            // 2. si estoy quitando Admin → validar que no sea el último
+            if (currentRole == "Admin" && dto.Role != "Admin")
+            {
+                int adminCount = await _userRepository.CountAdminsAsync();
+                if (adminCount <= 1)
+                    throw new InvalidOperationException("No puedes quitar el último administrador.");
+            }
+
+            // 3. aplicar nuevo rol
+            await _userRepository.UpdateRoleAsync(user, dto.Role);
+
+
+            
+        }
         private static string GenerarCodigoDe6Digitos()
         {
             var random = new Random();
-            int num = random.Next(0, 1000000); 
-            return num.ToString("D6"); 
+            int num = random.Next(0, 1000000);
+            return num.ToString("D6");
         }
-
+        
 
 
     }

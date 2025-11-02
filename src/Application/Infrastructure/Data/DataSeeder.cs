@@ -170,6 +170,8 @@ namespace Tienda.src.Infrastructure.Data
                             ?? throw new InvalidOperationException(
                                 "El número de teléfono del usuario administrador no está configurado."
                             ),
+                        Status = UserStatus.Active,
+                        LastLoginAt = null
                     };
                     adminUser.UserName = adminUser.Email;
                     var adminPassword =
@@ -222,7 +224,9 @@ namespace Tienda.src.Infrastructure.Data
                         .RuleFor(u => u.Rut, f => RandomRut())
                         .RuleFor(u => u.BirthDate, f => f.Date.Past(30, DateTime.Now.AddYears(-18)))
                         .RuleFor(u => u.PhoneNumber, f => RandomPhoneNumber())
-                        .RuleFor(u => u.UserName, (f, u) => u.Email);
+                        .RuleFor(u => u.UserName, (f, u) => u.Email)
+                        .RuleFor(u => u.Status, _ => UserStatus.Active)
+                        .RuleFor(u => u.LastLoginAt, _ => null as DateTime?);
                     var users = userFaker.Generate(99);
                     foreach (var user in users)
                     {

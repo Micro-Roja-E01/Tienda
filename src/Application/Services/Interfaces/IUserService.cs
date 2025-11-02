@@ -1,6 +1,6 @@
 using Tienda.src.Application.DTO.AuthDTO;
 using Tienda.src.Application.DTO.UserDTO;
-
+using Tienda.src.Application.DTO.AdminUserDTO;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
@@ -24,6 +24,12 @@ namespace Tienda.src.Application.Services.Interfaces
         Task<UserProfileDTO> UpdateProfileAsync(int userId, UpdateProfileDTO dto);
 
         Task ChangePasswordAsync(int userId, ChangePasswordDTO dto, HttpContext httpContext);
+        
+        //  NUEVO: flujo 9
+        Task<PagedAdminUsersDTO> GetAllForAdminAsync(AdminUserSearchParamsDTO search);
+        Task<AdminUserDetailDTO> GetByIdForAdminAsync(int userId);
+        Task UpdateStatusForAdminAsync(int targetUserId, int adminId, UpdateUserStatusDTO dto);
+        Task UpdateRoleForAdminAsync(int targetUserId, int adminId, UpdateUserRoleDTO dto);
 
     }
 }

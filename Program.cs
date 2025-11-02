@@ -218,6 +218,8 @@ using (var scope = app.Services.CreateScope())
 {
     var productMapper = scope.ServiceProvider.GetRequiredService<ProductMapper>();
     productMapper.ConfigureAllMappings();
+    var userMapper = scope.ServiceProvider.GetRequiredService<UserMapper>();
+    userMapper.ConfigureAllMappings();
 }
 
 app.UseHangfireDashboard(
