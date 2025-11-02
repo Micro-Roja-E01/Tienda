@@ -26,12 +26,12 @@ namespace tienda.src.Application.DTO.ProductDTO.CostumerDTO
         public required int Price { get; set; }
 
         /// <summary>
-        /// Porcentaje de descuento aplicado al producto.
+        /// Porcentaje de descuento aplicado (0-100)
         /// </summary>
-        public required int DiscountPercentage { get; set; }
+        public required int Discount { get; set; }
 
         /// <summary>
-        /// Precio final con descuento aplicado.
+        /// Precio final calculado en servidor: Price - ceil(Price * Discount/100)
         /// </summary>
         public required int FinalPrice { get; set; }
 
@@ -59,5 +59,10 @@ namespace tienda.src.Application.DTO.ProductDTO.CostumerDTO
         /// Indica si el producto está disponible para su compra.
         /// </summary>
         public required bool IsAvailable { get; set; }
+
+        /// <summary>
+        /// Indica si el producto tiene descuento activo
+        /// </summary>
+        public bool HasDiscount => Discount > 0;
     }
 }

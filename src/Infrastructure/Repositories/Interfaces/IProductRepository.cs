@@ -24,7 +24,7 @@ namespace tienda.src.Infrastructure.Repositories.Interfaces
         /// </summary>
         /// <param name="searchParams">Parámetros de búsqueda para filtrar los productos.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el cliente y el conteo total de productos.</returns>
-        Task<(IEnumerable<ProductForCostumerDTO> products, int totalCount)>GetFilteredForCustomerAsync(SearchParamsDTO searchParams);
+        Task<(IEnumerable<ProductForCostumerDTO> products, int totalCount)> GetFilteredForCustomerAsync(SearchParamsDTO searchParams);
 
         /// <summary>
         /// Retorna un producto específico por su ID.
@@ -83,6 +83,13 @@ namespace tienda.src.Infrastructure.Repositories.Interfaces
         Task<Product?> GetByIdForAdminAsync(int id);
 
         /// <summary>
+        /// Obtiene un producto por su ID sin relaciones de navegación (para operaciones de actualización/eliminación)
+        /// </summary>
+        /// <param name="id">El ID del producto a buscar.</param>
+        /// <returns>Una tarea que representa la operación asíncrona, con el producto encontrado o null si no se encuentra.</returns>
+        Task<Product?> GetByIdWithoutRelationsAsync(int id);
+
+        /// <summary>
         /// Actualiza un producto existente.
         /// </summary>
         /// <param name="product">El producto con los datos actualizados.</param>
@@ -108,5 +115,12 @@ namespace tienda.src.Infrastructure.Repositories.Interfaces
         /// </summary>
         /// <returns>Tarea que representa la operación asíncrona</returns>
         Task ActivateAllAsync();
+
+        /// <summary>
+        /// Restaura un producto eliminado, marcándolo como disponible nuevamente.
+        /// </summary>
+        /// <param name="id">El ID del producto a restaurar.</param>
+        /// <returns>Una tarea que representa la operación asíncrona.</returns>
+        Task RestoreAsync(int id);
     }
 }

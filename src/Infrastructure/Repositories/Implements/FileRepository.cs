@@ -92,5 +92,110 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                 return false;
             }
         }
+
+        /// <summary>
+        /// Obtiene todas las imágenes asociadas a un producto.
+        /// Excluye imágenes marcadas como eliminadas.
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<Image>> GetByProductIdAsync(int productId)
+        {
+            return await _context.Images
+                .Where(i => i.ProductId == productId && !i.IsDeleted)  // Solo imágenes activas
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtiene todas las imágenes asociadas a un producto, incluyendo las eliminadas.
+        /// </summary>
+        /// <param name="productId">ID del producto</param>
+        /// <returns>Lista de todas las imágenes del producto</returns>
+        public async Task<IEnumerable<Image>> GetAllByProductIdAsync(int productId)
+        {
+            return await _context.Images
+                .Where(i => i.ProductId == productId)  // Todas las imágenes (incluyendo eliminadas)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtiene una imagen por su ID.
+        /// </summary>
+        /// <param name="id">ID de la imagen</param>
+        /// <returns>La imagen si existe, null si no existe</returns>
+        public async Task<Image?> GetByIdAsync(int id)
+        {
+            return await _context.Images
+                .FirstOrDefaultAsync(i => i.Id == id);
+        }
+
+        /// <summary>
+        /// Actualiza una imagen existente.
+        /// </summary>
+        /// <param name="image">La imagen con los datos actualizados</param>
+        /// <returns>Tarea que representa la operación asíncrona</returns>
+        public async Task UpdateAsync(Image image)
+        {
+            try
+            {
+                _context.Images.Update(image);
+                await _context.SaveChangesAsync();
+                Log.Information("Imagen {ImageId} actualizada exitosamente", image.Id);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al actualizar la imagen {ImageId}", image.Id);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Marca una imagen como eliminada (soft delete).
+        /// La imagen NO se elimina de Cloudinary para permitir restauración.
+        /// </summary>
+        /// <param name="id">ID de la imagen a eliminar</param>
+        /// <returns>Tarea que representa la operación asíncrona</returns>
+        public async Task SoftDeleteAsync(int id)
+        {
+            try
+            {
+                await _context.Images
+                    .Where(i => i.Id == id)
+                    .ExecuteUpdateAsync(i => i
+                        .SetProperty(x => x.IsDeleted, true)
+                        .SetProperty(x => x.DeletedAt, DateTime.UtcNow));
+
+                Log.Information("Imagen {ImageId} marcada como eliminada (soft delete)", id);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al marcar imagen {ImageId} como eliminada", id);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Restaura una imagen eliminada.
+        /// </summary>
+        /// <param name="id">ID de la imagen a restaurar</param>
+        /// <returns>Tarea que representa la operación asíncrona</returns>
+        public async Task RestoreAsync(int id)
+        {
+            try
+            {
+                await _context.Images
+                    .Where(i => i.Id == id)
+                    .ExecuteUpdateAsync(i => i
+                        .SetProperty(x => x.IsDeleted, false)
+                        .SetProperty(x => x.DeletedAt, (DateTime?)null));
+
+                Log.Information("Imagen {ImageId} restaurada exitosamente", id);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al restaurar imagen {ImageId}", id);
+                throw;
+            }
+        }
     }
 }

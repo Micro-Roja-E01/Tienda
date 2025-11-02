@@ -60,5 +60,33 @@ namespace tienda.src.Application.DTO.ProductDTO
         /// Dirección del ordenamiento (asc | desc).
         /// </summary>
         public string? SortDir { get; set; }
+
+        // --- FILTROS AVANZADOS ---
+
+        /// <summary>
+        /// Filtro por estado del producto: "Nuevo" o "Usado"
+        /// </summary>
+        [RegularExpression("^(Nuevo|Usado)$", ErrorMessage = "El estado debe ser 'Nuevo' o 'Usado'.")]
+        public string? Status { get; set; }
+
+        /// <summary>
+        /// Filtro por productos con descuento aplicado (mayor a 0%)
+        /// </summary>
+        public bool? HasDiscount { get; set; }
+
+        /// <summary>
+        /// Filtro por stock bajo (menor o igual al umbral configurado)
+        /// </summary>
+        public bool? LowStock { get; set; }
+
+        /// <summary>
+        /// Filtro por disponibilidad (solo para admin)
+        /// </summary>
+        public bool? IsAvailable { get; set; }
+
+        /// <summary>
+        /// Filtro por productos eliminados (solo para admin)
+        /// </summary>
+        public bool? IncludeDeleted { get; set; }
     }
 }

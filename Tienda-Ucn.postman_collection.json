@@ -18,7 +18,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjEyNDk0NTZ9.4omFkfA0sWMQL8LvoF2r_O_QdJztJSoMKiaMnTRa99E",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjIxMTY2MjN9.jAi9BuEW57eshh2sRKyXMu543WgvepsmwvcDsi8v5gE",
 									"type": "string"
 								}
 							]
@@ -32,23 +32,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{URL}}/admin/products?PageNumber=5&PageSize=1",
+							"raw": "{{URL}}/admin/55/detailed",
 							"host": [
 								"{{URL}}"
 							],
 							"path": [
 								"admin",
-								"products"
-							],
-							"query": [
-								{
-									"key": "PageNumber",
-									"value": "5"
-								},
-								{
-									"key": "PageSize",
-									"value": "1"
-								}
+								"55",
+								"detailed"
 							]
 						}
 					},
@@ -60,14 +51,23 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{URL}}/costumer/products/51",
+							"raw": "{{URL}}/costumer/products?PageNumber=1&PageSize=2",
 							"host": [
 								"{{URL}}"
 							],
 							"path": [
 								"costumer",
-								"products",
-								"51"
+								"products"
+							],
+							"query": [
+								{
+									"key": "PageNumber",
+									"value": "1"
+								},
+								{
+									"key": "PageSize",
+									"value": "2"
+								}
 							]
 						}
 					},
@@ -112,14 +112,14 @@
 					"response": []
 				},
 				{
-					"name": "Creat Cloud",
+					"name": "Create Cloud",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjIwMzI2MDl9.JFBfC4qT0YcetGqGB-OHfBQJMCnlsxTJl3gUZjt3pdQ",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjIxMTY2MjN9.jAi9BuEW57eshh2sRKyXMu543WgvepsmwvcDsi8v5gE",
 									"type": "string"
 								}
 							]
@@ -131,22 +131,27 @@
 							"formdata": [
 								{
 									"key": "title",
-									"value": "Portátil Ultraligero X1",
+									"value": "<script>alert('XSS')</script>iPhone",
 									"type": "text"
 								},
 								{
 									"key": "description",
-									"value": "Portátil de 14\" con 16GB RAM y SSD de 512GB",
+									"value": "Smartphone premium con cámara de 200MP y S Pen",
 									"type": "text"
 								},
 								{
 									"key": "price",
-									"value": "1200",
+									"value": "2200",
 									"type": "text"
 								},
 								{
 									"key": "stock",
-									"value": "25",
+									"value": "15",
+									"type": "text"
+								},
+								{
+									"key": "discount",
+									"value": "10",
 									"type": "text"
 								},
 								{
@@ -156,18 +161,18 @@
 								},
 								{
 									"key": "categoryName",
-									"value": "Computadoras",
+									"value": "Smartphones",
 									"type": "text"
 								},
 								{
 									"key": "brandName",
-									"value": "TechCorp",
+									"value": "Samsung",
 									"type": "text"
 								},
 								{
 									"key": "images",
 									"type": "file",
-									"src": "/C:/Users/sebas/Downloads/1735573186365-67b47f0494754b45d2359e6ea9c7cdd1b10c8c39_521984b0_thumbnail_51.jpg"
+									"src": "/C:/Users/sebas/Downloads/71ZoDT7a2wL._AC_SL1500_.jpg"
 								}
 							]
 						},
@@ -216,6 +221,114 @@
 							"path": [
 								"admin",
 								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjIxMjA3NDJ9.mXj8cnQqeIN7dyFTKDl3r3--UwraX5Co_7FVoLZumZ4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/admin/products/55",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"products",
+								"55"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjIxMTgwMzh9.RT2lv5obUlRtcX6_1h9dvKki_rC32QFNWzacdBI7LZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "price",
+									"value": "1000",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL}}/admin/products/52",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"products",
+								"52"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restore product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtYXRpYXNzb3RvY2FydmFqYWxAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NjIxMTgwMzh9.RT2lv5obUlRtcX6_1h9dvKki_rC32QFNWzacdBI7LZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "price",
+									"value": "1000",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL}}/admin/products/55/restore",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"admin",
+								"products",
+								"55",
+								"restore"
 							]
 						}
 					},
@@ -314,7 +427,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"sebastian.galvez02@alumnos.ucn.cl\",\r\n    \"verificationCode\": \"433292\"\r\n}",
+							"raw": "{\r\n    \"email\": \"sebastian.galvez02@alumnos.ucn.cl\",\r\n    \"verificationCode\": \"608651\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
