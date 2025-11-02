@@ -11,7 +11,7 @@ namespace Tienda.src.API.Controllers
     /// login, registro, verificación de correo y recuperación de contraseña.
     /// Expone los endpoints del Flujo 1 de la rúbrica (auth).
     /// </summary>
-    public class AuthController(IUserService userService) : BaseController
+    public class AuthController(IUserService userService, ICartService cartService) : BaseController
     {
         private readonly IUserService _userService = userService;
 
