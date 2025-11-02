@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using tienda.src.Application.DTO.ProductDTO;
+using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 using tienda.src.Infrastructure.Repositories.Interfaces;
 using Tienda.src.Application.Domain.Models;
 using Tienda.src.Infrastructure.Data;
-using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 
 namespace tienda.src.Infrastructure.Repositories.Implements
 {
@@ -50,7 +50,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Name.ToLower() == normalized.ToLower());
 
-            if (brand != null) 
+            if (brand != null)
                 return brand;
 
             var slug = GenerateSlug(normalized);
@@ -102,7 +102,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
             await _context.SaveChangesAsync();
             return newCategory;
 
-            
+
         }
         /// <summary>
         /// Retorna un producto específico por su ID.
@@ -136,6 +136,20 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                                         .FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Obtiene un producto por su ID sin relaciones de navegación (para operaciones de actualización/eliminación)
+        /// No usa AsNoTracking() ni Include() para evitar problemas con actualizaciones
+        /// </summary>
+        /// <param name="id">El ID del producto a buscar.</param>
+        /// <returns>Una tarea que representa la operación asíncrona, con el producto encontrado o null si no se encuentra.</returns>
+        public async Task<Product?> GetByIdWithoutRelationsAsync(int id)
+        {
+            return await _context.Products
+                                        .AsNoTracking()
+                                        .Where(p => p.Id == id)
+                                        .FirstOrDefaultAsync();
+        }
+
         // <summary>
         /// Retorna una lista de productos para el administrador con los parámetros de búsqueda especificados.
         /// </summary>
@@ -143,13 +157,27 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el administrador y el conteo total de productos.</returns>
         public async Task<(IEnumerable<Product> products, int totalCount)> GetFilteredForAdminAsync(SearchParamsDTO searchParams)
         {
+            int fewUnitsThreshold = _configuration.GetValue<int>("Products:FewUnitsAvailable");
+
             var query = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Images.OrderBy(i => i.CreatedAt).Take(1)) // Cargamos la URL de la imagen principal a la hora de crear el producto
                 .AsNoTracking();
 
+            // Filtro de disponibilidad (para admin puede ver todos o solo disponibles)
+            if (searchParams.IsAvailable.HasValue)
+            {
+                query = query.Where(p => p.IsAvailable == searchParams.IsAvailable.Value);
+            }
 
+            // Filtro de productos eliminados (por defecto excluidos, admin puede incluirlos)
+            if (!searchParams.IncludeDeleted.HasValue || !searchParams.IncludeDeleted.Value)
+            {
+                query = query.Where(p => !p.IsDeleted);
+            }
+
+            // Búsqueda por texto
             if (!string.IsNullOrWhiteSpace(searchParams.SearchTerm))
             {
                 var searchTerm = searchParams.SearchTerm.Trim().ToLower();
@@ -165,12 +193,75 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                 );
             }
 
+            // Filtro por categoría
+            if (!string.IsNullOrWhiteSpace(searchParams.Category))
+            {
+                var category = searchParams.Category.Trim().ToLower();
+                query = query.Where(p => p.Category.Name.ToLower() == category);
+            }
+
+            // Filtro por marca
+            if (!string.IsNullOrWhiteSpace(searchParams.Brand))
+            {
+                var brand = searchParams.Brand.Trim().ToLower();
+                query = query.Where(p => p.Brand.Name.ToLower() == brand);
+            }
+
+            // Filtro por rango de precio
+            if (searchParams.MinPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= searchParams.MinPrice.Value);
+            }
+
+            if (searchParams.MaxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= searchParams.MaxPrice.Value);
+            }
+
+            // Filtro por estado (Nuevo/Usado)
+            if (!string.IsNullOrWhiteSpace(searchParams.Status))
+            {
+                var status = searchParams.Status.Trim();
+                query = query.Where(p => p.Status.ToString() == status);
+            }
+
+            // Filtro por descuento
+            if (searchParams.HasDiscount.HasValue && searchParams.HasDiscount.Value)
+            {
+                query = query.Where(p => p.Discount > 0);
+            }
+
+            // Filtro por stock bajo
+            if (searchParams.LowStock.HasValue && searchParams.LowStock.Value)
+            {
+                query = query.Where(p => p.Stock > 0 && p.Stock <= fewUnitsThreshold);
+            }
+
+            // Contar total ANTES de paginar
+            int totalCount = await query.CountAsync();
+
+            // Ordenamiento
+            bool asc = (searchParams.SortDir ?? "asc").ToLower() == "asc";
+            switch ((searchParams.SortBy ?? "").ToLower())
+            {
+                case "price":
+                    query = asc ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price);
+                    break;
+                case "title":
+                    query = asc ? query.OrderBy(p => p.Title) : query.OrderByDescending(p => p.Title);
+                    break;
+                case "createdat":
+                default:
+                    query = query.OrderByDescending(p => p.CreatedAt);
+                    break;
+            }
+
+            // Paginación
             var products = await query
-                .OrderByDescending(p => p.CreatedAt)
                 .Skip(((searchParams.PageNumber ?? 1) - 1) * (searchParams.PageSize ?? _defaultPageSize))
                 .Take(searchParams.PageSize ?? _defaultPageSize)
                 .ToArrayAsync();
-            int totalCount = await query.CountAsync();
+
             return (products, totalCount);
         }
 
@@ -179,13 +270,13 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// </summary>
         /// <param name="searchParams">Parámetros de búsqueda para filtrar los productos.</param>
         /// <returns>Una tarea que representa la operación asíncrona, con una lista de productos para el cliente y el conteo total de productos.</returns>
-        public async Task<(IEnumerable<ProductForCostumerDTO> products, int totalCount)>GetFilteredForCustomerAsync(SearchParamsDTO searchParams)
+        public async Task<(IEnumerable<ProductForCostumerDTO> products, int totalCount)> GetFilteredForCustomerAsync(SearchParamsDTO searchParams)
         {
             int pageNumber = searchParams.PageNumber ?? 1;
-            int pageSize   = searchParams.PageSize   ?? _defaultPageSize;
+            int pageSize = searchParams.PageSize ?? _defaultPageSize;
 
             int fewUnitsThreshold = _configuration.GetValue<int>("Products:FewUnitsAvailable");
-            string fallbackImage  = _configuration["Products:DefaultImageUrl"]
+            string fallbackImage = _configuration["Products:DefaultImageUrl"]
                 ?? "https://shop.songprinting.com/global/images/PublicShop/ProductSearch/prodgr_default_300.png";
 
             // Base query (solo disponibles)
@@ -197,10 +288,11 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                     p.Id,
                     p.Title,
                     CategoryName = p.Category.Name,
-                    BrandName    = p.Brand.Name,
+                    BrandName = p.Brand.Name,
                     p.Price,
                     p.Discount,     // %
                     p.Stock,
+                    p.Status,       // Enum
                     p.IsAvailable,
                     p.CreatedAt,
                     MainImageURL = p.Images
@@ -233,6 +325,22 @@ namespace tienda.src.Infrastructure.Repositories.Implements
             if (searchParams.MaxPrice.HasValue)
                 query = query.Where(p => p.Price <= searchParams.MaxPrice.Value);
 
+            // Filtros avanzados
+            if (!string.IsNullOrWhiteSpace(searchParams.Status))
+            {
+                var status = searchParams.Status.Trim();
+                // Comparar con el enum directamente
+                query = query.Where(p => p.Status.ToString() == status);
+            }
+            if (searchParams.HasDiscount.HasValue && searchParams.HasDiscount.Value)
+            {
+                query = query.Where(p => p.Discount > 0);
+            }
+            if (searchParams.LowStock.HasValue && searchParams.LowStock.Value)
+            {
+                query = query.Where(p => p.Stock > 0 && p.Stock <= fewUnitsThreshold);
+            }
+
             // Orden seguro
             bool asc = (searchParams.SortDir ?? "asc").ToLower() == "asc";
             switch ((searchParams.SortBy ?? "").ToLower())
@@ -260,7 +368,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
             var rows = page.Select(p =>
             {
                 int discountPct = p.Discount;
-                int finalPrice  = p.Price;
+                int finalPrice = p.Price;
                 if (discountPct > 0)
                 {
                     var discountValue = (int)Math.Ceiling(p.Price * (discountPct / 100.0));
@@ -277,7 +385,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                     Title = p.Title,
                     MainImageURL = string.IsNullOrWhiteSpace(p.MainImageURL) ? fallbackImage : p.MainImageURL,
                     Price = p.Price,
-                    DiscountPercentage = discountPct,
+                    Discount = discountPct,
                     FinalPrice = finalPrice,
                     Stock = p.Stock,
                     StockIndicator = indicator,
@@ -378,15 +486,32 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                 .Where(p => !p.IsAvailable)
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsAvailable, true));
         }
+
+        /// <summary>
+        /// Restaura un producto eliminado, marcándolo como disponible nuevamente.
+        /// </summary>
+        /// <param name="id">El ID del producto a restaurar.</param>
+        /// <returns>Una tarea que representa la operación asíncrona.</returns>
+        public async Task RestoreAsync(int id)
+        {
+            await _context.Products
+                .Where(p => p.Id == id)
+                .ExecuteUpdateAsync(p => p
+                    .SetProperty(x => x.IsDeleted, false)
+                    .SetProperty(x => x.DeletedAt, (DateTime?)null)
+                    .SetProperty(x => x.IsAvailable, true)
+                    .SetProperty(x => x.UpdatedAt, DateTime.UtcNow));
+        }
+
         private static string GenerateSlug(string text)
-            {
-                text = text.Trim().ToLower();
-                text = text
-                    .Replace("á", "a").Replace("é", "e").Replace("í", "i")
-                    .Replace("ó", "o").Replace("ú", "u").Replace("ñ", "n");
-                text = string.Join("-", text.Split(' ', StringSplitOptions.RemoveEmptyEntries));
-                return text;
-            }
-        
+        {
+            text = text.Trim().ToLower();
+            text = text
+                .Replace("á", "a").Replace("é", "e").Replace("í", "i")
+                .Replace("ó", "o").Replace("ú", "u").Replace("ñ", "n");
+            text = string.Join("-", text.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+            return text;
+        }
+
     }
 }
