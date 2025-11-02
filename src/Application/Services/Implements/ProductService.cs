@@ -33,6 +33,14 @@ namespace Tienda.src.Application.Services.Implements
             _defaultPageSize = int.Parse(_configuration["Products:DefaultPageSize"] ?? throw new InvalidOperationException("La configuración 'DefaultPageSize' no está definida."));
         }
 
+        /// <summary>
+        /// Crea un nuevo producto a partir de un DTO que incluye archivos de imagen.
+        /// Valida categoría, marca e imágenes antes de persistir.
+        /// </summary>
+        /// <param name="createProductDTO">Datos del producto a crear.</param>
+        /// <returns>Identificador del producto creado en formato string.</returns>
+        /// <exception cref="ArgumentNullException">Si el DTO es nulo.</exception>
+        /// <exception cref="InvalidOperationException">Si no se envía al menos una imagen.</exception>
         public async Task<string> CreateProductAsync(CreateProductDTO createProductDTO)
         {
             int productId = 0;
@@ -165,6 +173,13 @@ namespace Tienda.src.Application.Services.Implements
             }
         }
 
+        /// Crea un nuevo producto a partir de un DTO que viene en JSON (sin archivos),
+        /// permitiendo asociar imágenes por URL.
+        /// </summary>
+        /// <param name="createProductJsonDTO">Datos del producto, incluida la categoría, marca y URLs de imágenes.</param>
+        /// <returns>Identificador del producto creado en formato string.</returns>
+        /// <exception cref="ArgumentNullException">Si el DTO es nulo.</exception>
+        /// <exception cref="InvalidOperationException">Si ocurre un error al crear el producto.</exception>
         public async Task<string> CreateProductJsonAsync(CreateProductJsonDTO createProductJsonDTO)
         {
             try
@@ -232,6 +247,13 @@ namespace Tienda.src.Application.Services.Implements
             }
         }
 
+        /// <summary>
+        /// Obtiene el detalle de un producto para mostrarlo al cliente final,
+        /// incluyendo imágenes, precio final y estado de stock.
+        /// </summary>
+        /// <param name="productId">Identificador del producto.</param>
+        /// <returns>DTO con el detalle del producto.</returns>
+        /// <exception cref="KeyNotFoundException">Si el producto no existe.</exception>
         public async Task<ProductDetailDTO> GetByIdForCostumerAsync(int productId)
         {
             var product = await _productRepository.GetByIdAsync(productId)
@@ -271,6 +293,13 @@ namespace Tienda.src.Application.Services.Implements
 
             return dto;
         }
+
+        /// <summary>
+        /// Obtiene el detalle de un producto para la vista de administrador.
+        /// </summary>
+        /// <param name="productId">Identificador del producto.</param>
+        /// <returns>DTO con la información del producto.</returns>
+        /// <exception cref="KeyNotFoundException">Si el producto no existe.</exception>
         public async Task<ProductDetailDTO> GetByIdForAdminAsync(int productId)
         {
             var product = await _productRepository.GetByIdForAdminAsync(productId) ?? throw new KeyNotFoundException($"Producto con ID {productId} no encontrado.");
@@ -290,6 +319,12 @@ namespace Tienda.src.Application.Services.Implements
             return product.Adapt<ProductDetailForAdminDTO>();
         }
 
+        /// Obtiene una lista paginada de productos para el panel de administración,
+        /// aplicando filtros, orden y paginación.
+        /// </summary>
+        /// <param name="searchParams">Parámetros de búsqueda y paginación.</param>
+        /// <returns>Listado de productos para administrador con metadatos.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Si el número de página está fuera de rango.</exception>
         public async Task<ListedProductsForAdminDTO> GetFilteredForAdminAsync(SearchParamsDTO searchParams)
         {
             try
@@ -331,6 +366,13 @@ namespace Tienda.src.Application.Services.Implements
             }
         }
 
+         /// <summary>
+        /// Obtiene una lista paginada de productos para el cliente (tienda),
+        /// considerando disponibilidad, filtros y orden.
+        /// </summary>
+        /// <param name="searchParams">Parámetros de búsqueda (texto, categoría, marca, precio, orden).</param>
+        /// <returns>Listado de productos para cliente con metadatos de paginación.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Si la página solicitada no existe.</exception>
         public async Task<ListedProductsForCostumerDTO> GetFilteredForCostumerAsync(SearchParamsDTO searchParams)
         {
             try

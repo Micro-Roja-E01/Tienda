@@ -7,6 +7,10 @@ using Tienda.src.Application.Services.Interfaces;
 
 namespace Tienda.src.API.Controllers
 {
+    /// <summary>
+    /// Controlador para la administración de marcas.
+    /// Todos los endpoints están protegidos para rol "Admin" según la rúbrica (flujo 7.2).
+    /// </summary>
     [ApiController]
     [Route("api")]
     public class BrandController : ControllerBase
@@ -18,6 +22,11 @@ namespace Tienda.src.API.Controllers
             _brandService = brandService;
         }
 
+        /// <summary>
+        /// Obtiene el listado paginado de marcas para el panel de administración.
+        /// </summary>
+        /// <param name="searchParams">Parámetros de búsqueda y paginación.</param>
+        /// <returns>Listado paginado de marcas.</returns>
         // GET /api/admin/brands
         [HttpGet("admin/brands")]
         [Authorize(Roles = "Admin")]
@@ -30,6 +39,11 @@ namespace Tienda.src.API.Controllers
             ));
         }
 
+        /// <summary>
+        /// Obtiene el detalle de una marca específica por su ID.
+        /// </summary>
+        /// <param name="id">ID de la marca.</param>
+        /// <returns>Detalle de la marca o 404 si no existe.</returns>
         // GET /api/admin/brands/{id}
         [HttpGet("admin/brands/{id:int}")]
         [Authorize(Roles = "Admin")]
@@ -45,6 +59,12 @@ namespace Tienda.src.API.Controllers
             ));
         }
 
+        /// <summary>
+        /// Crea una nueva marca.
+        /// Valida nombre/slug duplicados en el servicio.
+        /// </summary>
+        /// <param name="dto">Datos de la marca a crear.</param>
+        /// <returns>Marca creada con código 201.</returns>
         // POST /api/admin/brands
         [HttpPost("admin/brands")]
         [Authorize(Roles = "Admin")]
@@ -57,7 +77,6 @@ namespace Tienda.src.API.Controllers
             {
                 var created = await _brandService.CreateAsync(dto);
 
-                
                 return StatusCode(
                     StatusCodes.Status201Created,
                     new GenericResponse<BrandDetailDTO>(
@@ -73,6 +92,12 @@ namespace Tienda.src.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Actualiza los datos de una marca existente.
+        /// </summary>
+        /// <param name="id">ID de la marca a actualizar.</param>
+        /// <param name="dto">Datos a modificar.</param>
+        /// <returns>Marca actualizada o 404 si no existe.</returns>
         // PUT /api/admin/brands/{id}
         [HttpPut("admin/brands/{id:int}")]
         [Authorize(Roles = "Admin")]
@@ -98,6 +123,12 @@ namespace Tienda.src.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Elimina lógicamente una marca o la deshabilita,
+        /// respetando las reglas de integridad (si tiene productos asociados se responde 409).
+        /// </summary>
+        /// <param name="id">ID de la marca a eliminar.</param>
+        /// <returns>Mensaje de confirmación o conflicto.</returns>
         // DELETE /api/admin/brands/{id}
         [HttpDelete("admin/brands/{id:int}")]
         [Authorize(Roles = "Admin")]

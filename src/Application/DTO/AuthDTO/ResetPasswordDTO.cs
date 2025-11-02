@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Tienda.src.Application.DTO.AuthDTO
 {
+    /// <summary>
+    /// DTO utilizado para restablecer la contraseña mediante código de recuperación.
+    /// </summary>
     public class ResetPasswordDTO
     {
         /// <summary>
@@ -15,13 +18,12 @@ namespace Tienda.src.Application.DTO.AuthDTO
         /// Código de recuperación enviado al correo electrónico.
         /// </summary>
         [Required(ErrorMessage = "El código de recuperación es obligatorio.")]
-        [RegularExpression(
-            @"^\d{6}$",
-            ErrorMessage = "El código de recuperación debe tener 6 dígitos."
-        )]
+        [RegularExpression(@"^\d{6}$", ErrorMessage = "El código de recuperación debe tener 6 dígitos.")]
         public required string RecoveryCode { get; set; }
 
-        // TODO: En la rubrica no especifica bien si se debe usar este DTO para poner la contraseña, a si que lo asumire
+        /// <summary>
+        /// Nueva contraseña que reemplazará la anterior.
+        /// </summary>
         [Required(ErrorMessage = "La nueva contraseña es obligatoria.")]
         [RegularExpression(
             @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':""\\|,.<>/?-]).*$",

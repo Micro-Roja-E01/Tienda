@@ -10,7 +10,10 @@ using Tienda.src.Application.DTO.ProductDTO;
 
 namespace Tienda.src.API.Controllers
 {
-    // 👇 ojo: este prefix es correcto
+    /// <summary>
+    /// Controlador de productos.
+    /// Expone catálogo público y endpoints administrativos para crear, editar y activar productos.
+    /// </summary>
     [Route("api")]
     public class ProductController : BaseController
     {
@@ -79,9 +82,11 @@ namespace Tienda.src.API.Controllers
         // ============================================================
         //    ADMINISTRADOR
         // ============================================================
+
         /// <summary>
-        /// Obtiene lista paginada de productos para administradores con filtros
+        /// Lista productos para el panel admin, incluyendo inactivos o eliminados según los filtros.
         /// </summary>
+        /// <param name="searchParams">Parámetros de filtrado y paginación.</param>
         [HttpGet("admin/products")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(GenericResponse<ListedProductsForAdminDTO>), StatusCodes.Status200OK)]
@@ -95,8 +100,10 @@ namespace Tienda.src.API.Controllers
         }
 
         /// <summary>
-        /// Obtiene detalle completo de un producto (admin)
+        /// Obtiene el detalle interno de un producto para administración.
+        /// Incluye banderas de estado e información adicional para gestión.
         /// </summary>
+        /// <param name="productId">ID del producto.</param>
         [HttpGet("admin/{productId:int}")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(GenericResponse<ProductDetailDTO>), StatusCodes.Status200OK)]
@@ -126,10 +133,11 @@ namespace Tienda.src.API.Controllers
             var result = await _productService.GetDetailedByIdForAdminAsync(productId);
             return Ok(new GenericResponse<ProductDetailForAdminDTO>("Detalle completo del producto obtenido exitosamente", result));
         }
-
-        /// <summary>
-        /// Crea un nuevo producto con URLs de imágenes (JSON)
+        
+        /// Crea un nuevo producto enviando el JSON del producto.
+        /// Este endpoint está pensado para pruebas o para paneles que no suben archivos.
         /// </summary>
+        /// <param name="createProductDTO">Datos del producto a crear.</param>
         [HttpPost("admin/create")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(GenericResponse<string>), StatusCodes.Status201Created)]
@@ -146,7 +154,6 @@ namespace Tienda.src.API.Controllers
         /// <summary>
         /// Crea un nuevo producto con archivos de imagen que se subirán a Cloudinary
         /// Incluye rollback automático si falla la subida de imágenes
-        /// </summary>
         [HttpPost("admin/create-with-files")]
         [Authorize(Roles = "Admin")]
         [Consumes("multipart/form-data")]
@@ -183,9 +190,11 @@ namespace Tienda.src.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Activa o desactiva un producto (toggle IsAvailable)
+
+        /// Activa o desactiva un producto específico.
+        /// Útil para el flujo 6.3 (estado del producto).
         /// </summary>
+        /// <param name="id">ID del producto.</param>
         [HttpPatch("admin/{id}/toggle-availability")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(GenericResponse<string>), StatusCodes.Status200OK)]
@@ -200,7 +209,8 @@ namespace Tienda.src.API.Controllers
         }
 
         /// <summary>
-        /// Endpoint temporal para activar todos los productos (solo para desarrollo)
+        /// Endpoint temporal para activar todos los productos.
+        /// Solo debe usarse en desarrollo o pruebas.
         /// </summary>
         [HttpPost("admin/activate-all")]
         [AllowAnonymous] // Temporal para facilitar el uso

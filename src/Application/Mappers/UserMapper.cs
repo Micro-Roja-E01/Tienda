@@ -12,7 +12,7 @@ namespace Tienda.src.Application.Mappers
         public UserMapper() { }
 
         /// <summary>
-        /// Configura el mapeo de RegisterDTO a User.
+        /// Configura todos los mapeos relacionados con autenticación de usuarios.
         /// </summary>
         public void ConfigureAllMappings()
         {
@@ -20,7 +20,8 @@ namespace Tienda.src.Application.Mappers
         }
 
         /// <summary>
-        /// Configura el mapeo de RegisterDTO a User.
+        /// Configura el mapeo de <see cref="RegisterDTO"/> hacia <see cref="User"/>.
+        /// Define asignación de UserName, Email y datos personales.
         /// </summary>
         public void ConfigureAuthMappings()
         {
