@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using tienda.src.Application.DTO.ProductDTO;
 using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 using tienda.src.Infrastructure.Repositories.Interfaces;
@@ -111,13 +112,15 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         /// <returns>Una tarea que representa la operación asíncrona, con el producto encontrado o null si no se encuentra.</returns>
         public async Task<Product?> GetByIdAsync(int id)
         {
-            return await _context.Products.
+            var result = await _context.Products.
                                         AsNoTracking().
-                                        Where(p => p.Id == id && p.IsAvailable).
+                                        Where(p => p.Id == id && !p.IsAvailable).
                                         Include(p => p.Category).
                                         Include(p => p.Brand).
                                         Include(p => p.Images)
                                         .FirstOrDefaultAsync();
+            Log.Information("Resultado de los productos obtenidos: {@result}", result);
+            return result;
         }
 
         /// <summary>

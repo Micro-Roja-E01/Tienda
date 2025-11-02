@@ -53,5 +53,6 @@ namespace Tienda.src.Application.Domain.Models
         /// URL de la imagen principal del producto al momento de la compra.
         /// </summary>
         public required string ImageUrlAtMoment { get; set; }
+        public required int DiscountAtMoment { get; set; }
     }
 }

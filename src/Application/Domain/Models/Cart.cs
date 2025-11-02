@@ -53,5 +53,15 @@ namespace Tienda.src.Application.Domain.Models
         /// Fecha de actualización del carrito de compras.
         /// </summary>
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Cantidad total de artículos únicos en el carrito.
+        /// </summary>
+        public int TotalUniqueItemsCount { get; set; }
+
+        /// <summary>
+        /// Monto total ahorrado por descuentos aplicados.
+        /// </summary>
+        public int TotalSavedAmount { get; set; }
     }
 }

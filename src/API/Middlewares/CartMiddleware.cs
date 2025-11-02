@@ -42,12 +42,10 @@ namespace Tienda.src.API.Middlewares
         public async Task InvokeAsync(HttpContext context)
         {
             var buyerId = context.Request.Cookies["BuyerId"];
-
             if (string.IsNullOrEmpty(buyerId))
             {
                 Log.Information("No se encontró la cookie de comprador, creando una nueva.");
                 buyerId = Guid.CreateVersion7().ToString();
-
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,

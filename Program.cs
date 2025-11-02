@@ -41,13 +41,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
 
-//Mappers
+#region Scoped Services Registration
 builder.Services.AddScoped<ProductMapper>();
 builder.Services.AddScoped<UserMapper>();
 builder.Services.AddScoped<CategoryMapper>();
 builder.Services.AddScoped<BrandMapper>();
-// builder.Services.AddScoped<CartMapper>(); TODO: Hay que realizar el cart mapper
-// builder.Services.AddScoped<OrderMapper>();
+builder.Services.AddScoped<CartMapper>();
+builder.Services.AddScoped<OrderMapper>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -64,11 +64,13 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IBrandService, BrandService>();
-// builder.Services.AddScoped<ICartRepository, CartRepository>();
-// builder.Services.AddScoped<ICartService, CartService>();
-// builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-// builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserJob, UserJob>();
+#endregion
 
 #region Email Service Configuration
 Log.Information("Configurando servicio de Email");
@@ -124,7 +126,7 @@ builder
         options.Password.RequireNonAlphanumeric = false;
 
         //Configuración de Email
-        // options.User.RequireUniqueEmail = true;
+        options.User.RequireUniqueEmail = true;
 
         //Configuración de UserName
         options.User.AllowedUserNameCharacters =
@@ -135,7 +137,7 @@ builder
     .AddDefaultTokenProviders();
 #endregion
 
-# region Logging Configuration
+#region Logging Configuration
 builder.Host.UseSerilog(
     (context, configuration) => configuration.ReadFrom.Configuration(context.Configuration)
 );
@@ -283,6 +285,8 @@ app.MapOpenApi();
 
 // Usar Middleware para el manejo global de excepciones
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+// Usar Middleware para el manejo del carrito de compras
+app.UseMiddleware<CartMiddleware>();
 
 // Agregar autenticación y autorización
 app.UseAuthentication();
