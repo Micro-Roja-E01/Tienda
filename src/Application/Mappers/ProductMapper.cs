@@ -1,5 +1,6 @@
 using Mapster;
 using tienda.src.Application.DTO.ProductDTO;
+using tienda.src.Application.DTO.ProductDTO.AdminDTO;
 using tienda.src.Application.DTO.ProductDTO.CostumerDTO;
 using Tienda.src.Application.Domain.Models;
 using Tienda.src.Application.Services.Implements;
@@ -28,6 +29,7 @@ namespace Tienda.src.Application.Mappers
         {
             ConfigureProductMappings();
             ConfigureProductDetailMappings();
+            ConfigureProductDetailForAdminMappings();
         }
 
         public void ConfigureProductMappings()
@@ -53,6 +55,42 @@ namespace Tienda.src.Application.Mappers
                 .Map(dest => dest.IsAvailable, src => src.IsAvailable)
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
                 .Map(dest => dest.UpdatedAt, src => src.UpdatedAt);
+        }
+
+        /// <summary>
+        /// Configura el mapeo de Product a ProductDetailForAdminDTO con toda la información de auditoría
+        /// </summary>
+        public void ConfigureProductDetailForAdminMappings()
+        {
+            TypeAdapterConfig<Product, ProductDetailForAdminDTO>.NewConfig()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.Title, src => src.Title)
+                .Map(dest => dest.Description, src => src.Description)
+                .Map(dest => dest.Price, src => src.Price)
+                .Map(dest => dest.Discount, src => src.Discount)
+                .Map(dest => dest.FinalPrice, src => src.FinalPrice) // Propiedad calculada
+                .Map(dest => dest.Stock, src => src.Stock)
+                .Map(dest => dest.Status, src => src.Status.ToString())
+                .Map(dest => dest.IsAvailable, src => src.IsAvailable)
+                .Map(dest => dest.IsDeleted, src => src.IsDeleted)
+                .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+                .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
+                .Map(dest => dest.DeletedAt, src => src.DeletedAt)
+                .Map(dest => dest.CategoryId, src => src.CategoryId)
+                .Map(dest => dest.CategoryName, src => src.Category != null ? src.Category.Name : "Sin categoría")
+                .Map(dest => dest.BrandId, src => src.BrandId)
+                .Map(dest => dest.BrandName, src => src.Brand != null ? src.Brand.Name : "Sin marca")
+                .Map(dest => dest.Images, src => src.Images.Select(img => new ImageDetailDTO
+                {
+                    Id = img.Id,
+                    ImageUrl = img.ImageUrl,
+                    PublicId = img.PublicId,
+                    CreatedAt = img.CreatedAt
+                }).ToList())
+                .Map(dest => dest.StockIndicator, src =>
+                    src.Stock <= 0 ? "Sin stock" :
+                    src.Stock <= _fewUnitsAvailable ? "Últimas unidades" :
+                    "En stock");
         }
     }
 }
