@@ -32,6 +32,17 @@ namespace Tienda.src.Application.Services.Implements
                 );
         }
 
+        /// <summary>
+        /// Genera un token JWT usando los datos del usuario y su rol.
+        /// La duración del token depende del parámetro <paramref name="rememberMe"/>.
+        /// </summary>
+        /// <param name="user">Usuario autenticado.</param>
+        /// <param name="roleName">Nombre del rol asignado al usuario.</param>
+        /// <param name="rememberMe">
+        /// Si es <c>true</c>, el token expira en 24 horas; de lo contrario, en 1 hora.
+        /// </param>
+        /// <returns>Token JWT serializado listo para ser devuelto al cliente.</returns>
+        /// <exception cref="InvalidOperationException">Si no se puede generar el token.</exception>
         public string GenerateToken(User user, string roleName, bool rememberMe)
         {
             try

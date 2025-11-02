@@ -17,6 +17,11 @@ namespace Tienda.src.Application.Services.Implements
             _context = context;
         }
 
+        /// <summary>
+        /// Obtiene una lista paginada de categorías, permitiendo filtrar por nombre.
+        /// </summary>
+        /// <param name="searchParams">Parámetros de búsqueda y paginación.</param>
+        /// <returns>DTO con las categorías y datos de paginación.</returns>
         public async Task<PagedCategoriesDTO> GetAllAsync(SearchParamsDTO searchParams)
         {
             int page = searchParams.PageNumber ?? 1;
@@ -69,6 +74,11 @@ namespace Tienda.src.Application.Services.Implements
             };
         }
 
+        /// <summary>
+        /// Obtiene el detalle de una categoría específica.
+        /// </summary>
+        /// <param name="id">Identificador de la categoría.</param>
+        /// <returns>DTO con el detalle de la categoría o <c>null</c> si no existe.</returns>
         public async Task<CategoryDetailDTO?> GetByIdAsync(int id)
         {
             var category = await _context.Categories
@@ -85,6 +95,12 @@ namespace Tienda.src.Application.Services.Implements
             return dto;
         }
 
+        /// <summary>
+        /// Crea una nueva categoría a partir de los datos proporcionados.
+        /// </summary>
+        /// <param name="dto">Datos de la categoría a crear.</param>
+        /// <returns>DTO con la categoría creada.</returns>
+        /// <exception cref="InvalidOperationException">Si ya existe una categoría con el mismo nombre.</exception>
         public async Task<CategoryDetailDTO> CreateAsync(CategoryCreateDTO dto)
         {
             string normalizedName = dto.Name.Trim();
@@ -117,6 +133,13 @@ namespace Tienda.src.Application.Services.Implements
             return result;
         }
 
+        /// <summary>
+        /// Actualiza una categoría existente validando la unicidad del nombre y del slug.
+        /// </summary>
+        /// <param name="id">Identificador de la categoría.</param>
+        /// <param name="dto">Datos actualizados.</param>
+        /// <returns>DTO actualizado o <c>null</c> si la categoría no existe.</returns>
+        /// <exception cref="InvalidOperationException">Si el nombre propuesto ya está en uso.</exception>
         public async Task<CategoryDetailDTO?> UpdateAsync(int id, CategoryUpdateDTO dto)
         {
             var category = await _context.Categories
@@ -157,6 +180,13 @@ namespace Tienda.src.Application.Services.Implements
             return result;
         }
 
+        /// <summary>
+        /// Elimina lógicamente una categoría si no tiene productos asociados.
+        /// </summary>
+        /// <param name="id">Identificador de la categoría.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Se lanza si la categoría no existe o tiene productos asociados.
+        /// </exception>
         public async Task DeleteAsync(int id)
         {
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
@@ -172,8 +202,11 @@ namespace Tienda.src.Application.Services.Implements
             await _context.SaveChangesAsync();
         }
 
-        // NO usamos este helper aquí porque el slug ya lo generas en el mapper,
-        // pero lo dejamos por si después quieres usarlo en otro lado.
+        /// <summary>
+        /// Genera un slug normalizado a partir de un nombre, reemplazando tildes y espacios.
+        /// </summary>
+        /// <param name="text">Texto a normalizar.</param>
+        /// <returns>Slug en minúsculas separado por guiones.</returns>
         private static string GenerateSlug(string text)
         {
             text = text.Trim().ToLower();

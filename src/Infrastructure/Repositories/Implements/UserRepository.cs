@@ -12,6 +12,9 @@ using Tienda.src.Application.DTO.AdminUserDTO;
 
 namespace Tienda.src.Infrastructure.Repositories.Implements
 {
+    /// <summary>
+    /// Repositorio para operaciones de persistencia sobre usuarios
+    /// </summary>
     public class UserRepository : IUserRepository
     {
         private readonly DataContext _context;
@@ -36,11 +39,22 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
                 );
         }
 
+        /// <summary>
+        /// Comprueba si la contraseña indicada coincide con la del usuario.
+        /// </summary>
+        /// <param name="user">Usuario a validar.</param>
+        /// <param name="password">Contraseña en texto plano.</param>
+        /// <returns><c>true</c> si la contraseña es correcta.</returns>
         public async Task<bool> CheckPasswordAsync(User user, string password)
         {
             return await _userManager.CheckPasswordAsync(user, password);
         }
 
+        /// <summary>
+        /// Marca el correo de un usuario como confirmado.
+        /// </summary>
+        /// <param name="email">Correo del usuario.</param>
+        /// <returns>Número de filas afectadas &gt; 0 si tuvo éxito.</returns>
         public async Task<bool> ConfirmEmailAsync(string email)
         {
             var result = await _context
@@ -49,6 +63,12 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return result > 0;
         }
 
+        /// <summary>
+        /// Crea un nuevo usuario en Identity y lo asigna al rol "Cliente".
+        /// </summary>
+        /// <param name="user">Entidad de usuario.</param>
+        /// <param name="password">Contraseña inicial.</param>
+        /// <returns><c>true</c> si se creó y se asignó el rol correctamente.</returns>
         public async Task<bool> CreateAsync(User user, string password)
         {
             var result = await _userManager.CreateAsync(user, password);
@@ -60,6 +80,11 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return false;
         }
 
+        /// <summary>
+        /// Elimina un usuario por su identificador.
+        /// </summary>
+        /// <param name="userId">ID del usuario.</param>
+        /// <returns><c>true</c> si se eliminó correctamente.</returns>
         public async Task<bool> DeleteAsync(int userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -67,7 +92,11 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return result.Succeeded;
         }
 
-        // TODO: Revisar que funcione con los metdoso de VerificationCode
+        /// <summary>
+        /// Elimina todos los usuarios que no han confirmado su correo dentro del plazo configurado
+        /// y borra también sus códigos de verificación asociados.
+        /// </summary>
+        /// <returns>Cantidad de usuarios eliminados.</returns>
         public async Task<int> DeleteUnconfirmedAsync()
         {
             Log.Information("Iniciando eliminacion de usuarios no confirmados");
@@ -98,27 +127,45 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return unconfirmedUsers.Count;
         }
 
+        /// <summary>
+        /// Indica si existe un usuario con el correo proporcionado.
+        /// </summary>
+        /// <param name="email">Correo a buscar.</param>
         public async Task<bool> ExistsByEmailAsync(string email)
         {
             return await _context.Users.AnyAsync(u => u.Email == email);
         }
 
+        /// <summary>
+        /// Indica si existe un usuario con el RUT proporcionado.
+        /// </summary>
+        /// <param name="rut">RUT a buscar.</param>
         public async Task<bool> ExistsByRutAsync(string rut)
         {
             return await _context.Users.AnyAsync(u => u.Rut == rut);
         }
 
+        /// <summary>
+        /// Obtiene un usuario por correo electrónico usando el <see cref="UserManager{TUser}"/>.
+        /// </summary>
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _userManager.FindByEmailAsync(email);
         }
 
+        /// <summary>
+        /// Obtiene un usuario por su identificador usando el <see cref="UserManager{TUser}"/>.
+        /// </summary>
         public async Task<User?> GetByIdAsync(int id)
         {
             return await _userManager.FindByIdAsync(id.ToString());
         }
 
-        
+        /// <summary>
+        /// Obtiene un usuario por RUT, con opción de hacer tracking del registro.
+        /// </summary>
+        /// <param name="rut">RUT a buscar.</param>
+        /// <param name="trackChanges">Si es <c>true</c> se habilita seguimiento de cambios.</param>
         public async Task<User?> GetByRutAsync(string rut, bool trackChanges = false)
         {
             if (trackChanges)
@@ -132,6 +179,11 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
                 .FirstOrDefaultAsync(u => u.Rut == rut);
         }
 
+        /// <summary>
+        /// Obtiene el primer rol asociado al usuario.
+        /// </summary>
+        /// <param name="user">Usuario objetivo.</param>
+        /// <returns>Nombre del rol.</returns>
 
         public async Task<string> GetUserRoleAsync(User user)
         {
@@ -140,6 +192,12 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             // El usuario ya deberia tener un rol en la Base de Datos, por eso no se pone el ?? "User".
         }
 
+        /// <summary>
+        /// Actualiza la contraseña del usuario usando el flujo de reseteo de Identity.
+        /// </summary>
+        /// <param name="user">Usuario objetivo.</param>
+        /// <param name="newPassword">Nueva contraseña.</param>
+        /// <returns><c>true</c> si se actualizó correctamente.</returns>
         public async Task<bool> UpdatePasswordAsync(User user, string newPassword)
         {
             // Generar el token de reinicio de contraseña
@@ -158,18 +216,30 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             Log.Warning($"Error al actualizar contraseña para {user.Email}: {errors}");
             throw new InvalidOperationException($"No se pudo actualizar la contraseña: {errors}");
         }
+
+        /// <summary>
+        /// Verifica si el correo indicado ya existe en otro usuario distinto al dado.
+        /// </summary>
         public async Task<bool> EmailExistsForOtherUserAsync(string email, int currentUserId)
         {
             return await _context.Users
                 .AnyAsync(u => u.Email == email && u.Id != currentUserId);
         }
 
+        /// <summary>
+        /// Verifica si el RUT indicado ya existe en otro usuario distinto al dado.
+        /// </summary>
         public async Task<bool> RutExistsForOtherUserAsync(string rut, int currentUserId)
         {
             return await _context.Users
                 .AnyAsync(u => u.Rut == rut && u.Id != currentUserId);
         }
 
+        /// <summary>
+        /// Actualiza los datos de perfil de un usuario en Identity.
+        /// </summary>
+        /// <param name="user">Usuario con los cambios.</param>
+        /// <returns><c>true</c> si se actualizó correctamente.</returns>
         public async Task<bool> UpdateProfileAsync(User user)
         {
             var result = await _userManager.UpdateAsync(user);
@@ -184,7 +254,14 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             Log.Warning("Error al actualizar perfil de usuario {UserId}: {Errors}", user.Id, errors);
             throw new InvalidOperationException($"No se pudo actualizar el perfil: {errors}");
         }
-        public async Task<(List<User> users, Dictionary<int,string> roles, int totalCount)> GetPagedForAdminAsync(AdminUserSearchParamsDTO search)
+
+        /// <summary>
+        /// Obtiene usuarios paginados para el panel de administración,
+        /// permitiendo filtrar por correo, estado, fechas y rol.
+        /// </summary>
+        /// <param name="search">Parámetros de búsqueda.</param>
+        /// <returns>Tupla con usuarios de la página, roles de esos usuarios y total de registros.</returns>
+        public async Task<(List<User> users, Dictionary<int, string> roles, int totalCount)> GetPagedForAdminAsync(AdminUserSearchParamsDTO search)
         {
             var query = _context.Users.AsQueryable();
 
@@ -231,7 +308,7 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
                 else
                 {
                     // no existe el rol -> lista vacía
-                    return (new List<User>(), new Dictionary<int,string>(), 0);
+                    return (new List<User>(), new Dictionary<int, string>(), 0);
                 }
             }
 
@@ -277,6 +354,11 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return (users, resultRoles, totalCount);
         }
 
+        /// <summary>
+        /// Obtiene un usuario con su rol asociado a partir del ID.
+        /// </summary>
+        /// <param name="userId">ID del usuario.</param>
+        /// <returns>Tupla con usuario y nombre del rol, o <c>null</c> si no existe.</returns>
         public async Task<(User user, string role)?> GetByIdWithRoleAsync(int userId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -293,6 +375,9 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return (user, roleName);
         }
 
+        /// <summary>
+        /// Cuenta la cantidad de usuarios que tienen rol de administrador.
+        /// </summary>
         public async Task<int> CountAdminsAsync()
         {
             var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
@@ -301,6 +386,11 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             return await _context.UserRoles.CountAsync(ur => ur.RoleId == adminRole.Id);
         }
 
+        /// <summary>
+        /// Actualiza el estado (activo/bloqueado) del usuario y sincroniza el lockout de Identity.
+        /// </summary>
+        /// <param name="user">Usuario a actualizar.</param>
+        /// <param name="status">Nuevo estado.</param>
         public async Task UpdateStatusAsync(User user, UserStatus status)
         {
             user.Status = status;
@@ -320,6 +410,11 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             await _userManager.UpdateAsync(user);
         }
 
+        /// <summary>
+        /// Reemplaza los roles actuales del usuario y asigna el nuevo rol indicado.
+        /// </summary>
+        /// <param name="user">Usuario objetivo.</param>
+        /// <param name="roleName">Nuevo rol a asignar.</param>
         public async Task UpdateRoleAsync(User user, string roleName)
         {
             var currentRoles = await _userManager.GetRolesAsync(user);
@@ -329,6 +424,11 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
             }
             await _userManager.AddToRoleAsync(user, roleName);
         }
+
+        /// <summary>
+        /// Actualiza la fecha y hora del último inicio de sesión del usuario.
+        /// </summary>
+        /// <param name="user">Usuario a actualizar.</param>
         public async Task UpdateLastLoginAtAsync(User user)
         {
             user.LastLoginAt = DateTime.UtcNow;

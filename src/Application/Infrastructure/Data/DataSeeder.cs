@@ -10,6 +10,10 @@ using Tienda.src.Application.Domain.Models;
 
 namespace Tienda.src.Infrastructure.Data
 {
+    /// <summary>
+    /// Clase responsable de poblar la base de datos con datos iniciales (roles, usuarios, categorías, marcas, productos).
+    /// Se utiliza principalmente al iniciar la aplicación en entornos de desarrollo.
+    /// </summary>
     public class DataSeeder
     {
         /// <summary>
@@ -330,6 +334,11 @@ namespace Tienda.src.Infrastructure.Data
             string secondPartNumber = faker.Random.Int(1000, 9999).ToString();
             return $"+569 {firstPartNumber}{secondPartNumber}";
         }
+        /// <summary>
+        /// Genera un slug normalizado a partir de un texto, removiendo acentos y reemplazando espacios por guiones.
+        /// </summary>
+        /// <param name="text">Texto de entrada.</param>
+        /// <returns>Slug en minúsculas y sin caracteres especiales.</returns>
         private static string GenerateSlug(string text)
         {
             text = text.Trim().ToLower();

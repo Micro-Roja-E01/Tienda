@@ -8,6 +8,10 @@ using Tienda.src.Application.Services.Interfaces;
 
 namespace Tienda.src.API.Controllers
 {
+    /// <summary>
+    /// Controlador para la gestión de la cuenta del usuario autenticado.
+    /// Implementa los endpoints del flujo 2 de la rúbrica (perfil y cambio de contraseña).
+    /// </summary>
     [ApiController]
     [Route("api/user")]
     public class UserController : BaseController
@@ -19,6 +23,11 @@ namespace Tienda.src.API.Controllers
             _userService = userService;
         }
 
+        /// <summary>
+        /// Obtiene el identificador del usuario autenticado desde el token JWT.
+        /// </summary>
+        /// <returns>ID del usuario autenticado.</returns>
+        /// <exception cref="UnauthorizedAccessException">Si no se puede determinar el usuario.</exception>
         // helper privado para sacar el userId del JWT
         private int GetCurrentUserId()
         {
@@ -37,7 +46,7 @@ namespace Tienda.src.API.Controllers
         }
 
         /// <summary>
-        /// 2.1 Obtener perfil del usuario autenticado
+        /// 2.1 Obtener perfil del usuario autenticado.
         /// </summary>
         [HttpGet("profile")]
         [Authorize] // cualquier usuario logueado
@@ -52,7 +61,7 @@ namespace Tienda.src.API.Controllers
         }
 
         /// <summary>
-        /// 2.2 Editar datos del perfil (nombre, rut, teléfono, etc)
+        /// 2.2 Editar datos del perfil (nombre, rut, teléfono, etc).
         /// Puede gatillar verificación de nuevo email.
         /// </summary>
         [HttpPut("profile")]
@@ -73,7 +82,8 @@ namespace Tienda.src.API.Controllers
         }
 
         /// <summary>
-        /// 2.3 Cambiar contraseña del usuario autenticado
+        /// 2.3 Cambiar contraseña del usuario autenticado.
+        /// Invalida sesiones activas según la implementación del servicio.
         /// </summary>
         [HttpPatch("change-password")]
         [Authorize]

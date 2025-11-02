@@ -7,10 +7,20 @@ using Tienda.src.Application.DTO.BaseResponse;
 
 namespace Tienda.src.API.Middlewares
 {
+    /// <summary>
+    /// Middleware global de manejo de excepciones.
+    /// Captura cualquier excepción no controlada en el pipeline,
+    /// la registra y devuelve una respuesta JSON uniforme con un código HTTP apropiado.
+    /// </summary>
     public class ExceptionHandlingMiddleware(RequestDelegate next)
     {
         private readonly RequestDelegate _next = next;
 
+        /// <summary>
+        /// Ejecuta el siguiente middleware y captura las excepciones que se produzcan.
+        /// Si ocurre una excepción, se mapea a un código HTTP y se devuelve un cuerpo JSON con el detalle.
+        /// </summary>
+        /// <param name="context">Contexto HTTP actual.</param>
         public async Task InvokeAsync(HttpContext context)
         {
             try
@@ -40,6 +50,12 @@ namespace Tienda.src.API.Middlewares
             }
         }
 
+        /// <summary>
+        /// Mapea una excepción conocida a un código de estado HTTP y un título legible.
+        /// Si la excepción no es reconocida, devuelve 500 (Error interno del servidor).
+        /// </summary>
+        /// <param name="ex">Excepción capturada.</param>
+        /// <returns>Tupla con el código de estado y el título del error.</returns>
         private static (int, string) MapExceptionToStatus(Exception ex)
         {
             return ex switch
@@ -66,6 +82,7 @@ namespace Tienda.src.API.Middlewares
                     "Demasiadas solicitudes"
                 ),
                 JsonException _ => (StatusCodes.Status400BadRequest, "JSON inválido"),
+                // parece un código de prueba; lo dejo igual para no cambiar tu lógica
                 NullReferenceException => (StatusCodes.Status101SwitchingProtocols, "Test"),
                 _ => (StatusCodes.Status500InternalServerError, "Error interno del servidor"),
             };

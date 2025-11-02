@@ -4,20 +4,30 @@ using Tienda.src.Application.DTO.CategoryDTO;
 
 namespace Tienda.src.Application.Mappers
 {
+    /// <summary>
+    /// Configura los mapeos entre categorías de dominio y los DTOs usados en la API.
+    /// </summary>
     public class CategoryMapper
     {
         public CategoryMapper() { }
 
+        /// <summary>
+        /// Registra todas las configuraciones de mapeo relacionadas con categorías.
+        /// </summary>
         public void ConfigureAllMappings()
         {
             ConfigureCategoryMappings();
         }
 
+        /// <summary>
+        /// Configura los mapeos específicos para Category:
+        /// dominio → list/detail y DTO → dominio.
+        /// </summary>
         public void ConfigureCategoryMappings()
         {
             // Domain -> list item
             TypeAdapterConfig<Category, CategoryListItemDTO>.NewConfig()
-                .Map(dest => dest.ProductCount, _ => 0); 
+                .Map(dest => dest.ProductCount, _ => 0);
 
             // Domain -> detail
             TypeAdapterConfig<Category, CategoryDetailDTO>.NewConfig()
@@ -37,6 +47,11 @@ namespace Tienda.src.Application.Mappers
                 .Map(dest => dest.Slug, src => GenerateSlug(src.Name));
         }
 
+        /// <summary>
+        /// Genera un slug normalizado a partir del nombre de la categoría.
+        /// </summary>
+        /// <param name="text">Texto de entrada.</param>
+        /// <returns>Slug en minúsculas y separado por guiones.</returns>
         private static string GenerateSlug(string text)
         {
             text = text.Trim().ToLower();

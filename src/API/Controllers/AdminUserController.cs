@@ -9,17 +9,28 @@ using Tienda.src.Application.Services.Interfaces;
 
 namespace Tienda.src.API.Controllers
 {
+    /// <summary>
+    /// Controlador que gestiona las operaciones administrativas sobre usuarios.
+    /// Accesible únicamente por usuarios con rol "Admin".
+    /// </summary>
     [ApiController]
     [Route("api")]
     public class AdminUserController : ControllerBase
     {
         private readonly IUserService _userService;
 
+        /// <summary>
+        /// Inicializa una nueva instancia del controlador con el servicio de usuarios.
+        /// </summary>
         public AdminUserController(IUserService userService)
         {
             _userService = userService;
         }
 
+        /// <summary>
+        /// Obtiene el ID del administrador autenticado a partir del token JWT.
+        /// </summary>
+        /// <exception cref="UnauthorizedAccessException">Si no se encuentra el claim del identificador.</exception>
         private int GetCurrentAdminId()
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -27,7 +38,12 @@ namespace Tienda.src.API.Controllers
             return int.Parse(claim.Value);
         }
 
-        // GET /api/admin/users
+        /// <summary>
+        /// Devuelve un listado paginado de todos los usuarios registrados,
+        /// accesible solo por administradores.
+        /// </summary>
+        /// <param name="searchParams">Parámetros de búsqueda y filtrado (paginación, estado, rol, etc.).</param>
+        /// <returns>Respuesta genérica con la lista paginada de usuarios.</returns>
         [HttpGet("admin/users")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllAsync([FromQuery] AdminUserSearchParamsDTO searchParams)
@@ -37,7 +53,11 @@ namespace Tienda.src.API.Controllers
             return Ok(new GenericResponse<PagedAdminUsersDTO>("Usuarios obtenidos exitosamente", result));
         }
 
-        // GET /api/admin/users/{id}
+        /// <summary>
+        /// Obtiene el detalle completo de un usuario específico según su ID.
+        /// </summary>
+        /// <param name="id">Identificador del usuario.</param>
+        /// <returns>Detalle del usuario solicitado.</returns>
         [HttpGet("admin/users/{id:int}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetByIdAsync(int id)
@@ -46,7 +66,12 @@ namespace Tienda.src.API.Controllers
             return Ok(new GenericResponse<AdminUserDetailDTO>("Usuario obtenido exitosamente", result));
         }
 
-        // PATCH /api/admin/users/{id}/status
+        /// <summary>
+        /// Actualiza el estado (activo/bloqueado) de un usuario específico.
+        /// </summary>
+        /// <param name="id">ID del usuario a modificar.</param>
+        /// <param name="dto">DTO con el nuevo estado.</param>
+        /// <returns>Confirmación del cambio de estado.</returns>
         [HttpPatch("admin/users/{id:int}/status")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatusAsync(int id, [FromBody] UpdateUserStatusDTO dto)
@@ -56,7 +81,12 @@ namespace Tienda.src.API.Controllers
             return Ok(new GenericResponse<string>("Estado de usuario actualizado correctamente"));
         }
 
-        // PATCH /api/admin/users/{id:int}/role
+        /// <summary>
+        /// Actualiza el rol de un usuario determinado (por ejemplo, de "Cliente" a "Admin").
+        /// </summary>
+        /// <param name="id">ID del usuario a actualizar.</param>
+        /// <param name="dto">DTO con el nuevo rol asignado.</param>
+        /// <returns>Confirmación del cambio de rol.</returns>
         [HttpPatch("admin/users/{id:int}/role")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateRoleAsync(int id, [FromBody] UpdateUserRoleDTO dto)
