@@ -18,5 +18,6 @@ namespace Tienda.src.Application.Domain.Models
         public required int PriceAtMoment { get; set; }
         public required string DescriptionAtMoment { get; set; }
         public required string ImageUrlAtMoment { get; set; }
+        public required int DiscountAtMoment { get; set; }
     }
 }
