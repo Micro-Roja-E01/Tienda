@@ -3,41 +3,62 @@ using System.ComponentModel.DataAnnotations;
 
 namespace tienda.src.Application.DTO.ProductDTO
 {
+    /// <summary>
+    /// DTO que define los parámetros de búsqueda, filtrado y paginación de productos.
+    /// </summary>
     public class SearchParamsDTO
     {
+        /// <summary>
+        /// Número de página solicitada (1 por defecto).
+        /// </summary>
         [Range(1, int.MaxValue, ErrorMessage = "El número de página debe ser un valor entero positivo.")]
         public int? PageNumber { get; set; } = 1;
 
+        /// <summary>
+        /// Tamaño de página (cantidad de registros por página).
+        /// </summary>
         [Range(1, int.MaxValue, ErrorMessage = "El tamaño de página debe ser un valor entero positivo.")]
         public int? PageSize { get; set; }
 
+        /// <summary>
+        /// Término de búsqueda (mínimo 2 caracteres).
+        /// </summary>
         [MinLength(2, ErrorMessage = "El término de búsqueda debe tener al menos 2 caracteres.")]
         [MaxLength(40, ErrorMessage = "El término de búsqueda no puede tener más de 40 caracteres.")]
         public string? SearchTerm { get; set; }
 
-        // --- NUEVO ---
-
-        // Filtro por categoría exacta 
+        /// <summary>
+        /// Filtro por categoría exacta.
+        /// </summary>
         [MaxLength(50, ErrorMessage = "El nombre de la categoría no puede tener más de 50 caracteres.")]
         public string? Category { get; set; }
 
-        // Filtro por marca exacta
+        /// <summary>
+        /// Filtro por marca exacta.
+        /// </summary>
         [MaxLength(50, ErrorMessage = "El nombre de la marca no puede tener más de 50 caracteres.")]
         public string? Brand { get; set; }
 
-        // Rango de precio en CLP
+        /// <summary>
+        /// Precio mínimo del rango de búsqueda (en CLP).
+        /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = "El precio mínimo debe ser un número positivo.")]
         public int? MinPrice { get; set; }
 
+        /// <summary>
+        /// Precio máximo del rango de búsqueda (en CLP).
+        /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = "El precio máximo debe ser un número positivo.")]
         public int? MaxPrice { get; set; }
 
-        // Ordenamiento seguro
-        // sortBy admite SOLO: price | createdAt | title
+        /// <summary>
+        /// Campo por el cual ordenar los resultados (price | createdAt | title).
+        /// </summary>
         public string? SortBy { get; set; }
 
-        // sortDir admite SOLO: asc | desc
+        /// <summary>
+        /// Dirección del ordenamiento (asc | desc).
+        /// </summary>
         public string? SortDir { get; set; }
     }
-
 }

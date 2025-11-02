@@ -8,6 +8,10 @@ using Tienda.src.Application.Services.Interfaces;
 
 namespace Tienda.src.API.Controllers
 {
+    /// <summary>
+    /// Controlador para la administración de categorías.
+    /// Implementa los endpoints del flujo 7.1 de la rúbrica (categorías, solo Admin).
+    /// </summary>
     [ApiController]
     [Route("api")]
     public class CategoriesController : BaseController
@@ -19,6 +23,11 @@ namespace Tienda.src.API.Controllers
             _categoryService = categoryService;
         }
 
+        /// <summary>
+        /// Lista todas las categorías en forma paginada para el panel admin.
+        /// </summary>
+        /// <param name="searchParams">Parámetros de búsqueda/paginación.</param>
+        /// <returns>Listado paginado de categorías.</returns>
         // GET /api/admin/categories
         [HttpGet("admin/categories")]
         [Authorize(Roles = "Admin")]
@@ -31,6 +40,11 @@ namespace Tienda.src.API.Controllers
             ));
         }
 
+        /// <summary>
+        /// Obtiene el detalle de una categoría por su ID.
+        /// </summary>
+        /// <param name="id">ID de la categoría.</param>
+        /// <returns>Detalle de la categoría o 404 si no existe.</returns>
         // GET /api/admin/categories/{id}
         [HttpGet("admin/categories/{id:int}", Name = "GetCategoryById")]
         [Authorize(Roles = "Admin")]
@@ -46,6 +60,11 @@ namespace Tienda.src.API.Controllers
             ));
         }
 
+        /// <summary>
+        /// Crea una nueva categoría.
+        /// </summary>
+        /// <param name="dto">Datos de la categoría.</param>
+        /// <returns>Categoría creada con su ubicación.</returns>
         // POST /api/admin/categories
         [HttpPost("admin/categories")]
         [Authorize(Roles = "Admin")]
@@ -66,6 +85,12 @@ namespace Tienda.src.API.Controllers
             );
         }
 
+        /// <summary>
+        /// Actualiza los datos de una categoría existente.
+        /// </summary>
+        /// <param name="id">ID de la categoría a editar.</param>
+        /// <param name="dto">Nuevos datos.</param>
+        /// <returns>Categoría actualizada o 404.</returns>
         // PUT /api/admin/categories/{id}
         [HttpPut("admin/categories/{id:int}")]
         [Authorize(Roles = "Admin")]
@@ -84,6 +109,12 @@ namespace Tienda.src.API.Controllers
             ));
         }
 
+        /// <summary>
+        /// Elimina lógicamente una categoría o la marca como no disponible.
+        /// Respeta la integridad: si tiene productos asociados, responde 409.
+        /// </summary>
+        /// <param name="id">ID de la categoría.</param>
+        /// <returns>Mensaje de confirmación o conflicto.</returns>
         // DELETE /api/admin/categories/{id}
         [HttpDelete("admin/categories/{id:int}")]
         [Authorize(Roles = "Admin")]

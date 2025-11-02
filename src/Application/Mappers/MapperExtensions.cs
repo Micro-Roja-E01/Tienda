@@ -1,6 +1,5 @@
 using Mapster;
 
-
 namespace Tienda.src.Application.Mappers
 {
     /// <summary>
@@ -10,8 +9,10 @@ namespace Tienda.src.Application.Mappers
     public class MapperExtensions
     {
         /// <summary>
-        /// Configura los mapeos globales.
+        /// Registra todas las configuraciones de Mapster que usan los distintos mappers de la aplicación.
+        /// Debe llamarse en el arranque (por ejemplo, en Program.cs).
         /// </summary>
+        /// <param name="serviceProvider">Proveedor de servicios para resolver los mappers registrados.</param>
         public static void ConfigureMapster(IServiceProvider serviceProvider)
         {
             var productMapper = serviceProvider.GetService<ProductMapper>();

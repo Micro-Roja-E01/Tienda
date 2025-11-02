@@ -17,6 +17,11 @@ namespace Tienda.src.Application.Services.Implements
             _context = context;
         }
 
+        /// <summary>
+        /// Obtiene una lista paginada de marcas filtradas por nombre.
+        /// </summary>
+        /// <param name="searchParams">Parámetros de búsqueda y paginación (término, página, tamaño de página).</param>
+        /// <returns>Objeto con la página de marcas y metadatos de paginación.</returns>
         public async Task<PagedBrandsDTO> GetAllAsync(SearchParamsDTO searchParams)
         {
             int page = searchParams.PageNumber ?? 1;
@@ -60,6 +65,11 @@ namespace Tienda.src.Application.Services.Implements
             };
         }
 
+        /// <summary>
+        /// Obtiene el detalle de una marca por su identificador.
+        /// </summary>
+        /// <param name="id">Identificador único de la marca.</param>
+        /// <returns>DTO con el detalle de la marca o <c>null</c> si no existe.</returns>
         public async Task<BrandDetailDTO?> GetByIdAsync(int id)
         {
             var brand = await _context.Brands
@@ -76,6 +86,12 @@ namespace Tienda.src.Application.Services.Implements
             return dto;
         }
 
+        /// <summary>
+        /// Crea una nueva marca validando que no exista otra con el mismo nombre o slug.
+        /// </summary>
+        /// <param name="dto">Datos de la marca a crear.</param>
+        /// <returns>DTO con el detalle de la marca creada.</returns>
+        /// <exception cref="InvalidOperationException">Si ya existe una marca con el mismo nombre.</exception>
         public async Task<BrandDetailDTO> CreateAsync(BrandCreateDTO dto)
         {
             string normalizedName = dto.Name.Trim();
@@ -108,6 +124,13 @@ namespace Tienda.src.Application.Services.Implements
             return result;
         }
 
+        /// <summary>
+        /// Actualiza una marca existente validando unicidad de nombre y slug.
+        /// </summary>
+        /// <param name="id">Identificador de la marca a actualizar.</param>
+        /// <param name="dto">Nuevos datos de la marca.</param>
+        /// <returns>DTO actualizado o <c>null</c> si la marca no existe.</returns>
+        /// <exception cref="InvalidOperationException">Si el nuevo nombre ya está en uso por otra marca.</exception>
         public async Task<BrandDetailDTO?> UpdateAsync(int id, BrandUpdateDTO dto)
         {
             var brand = await _context.Brands.FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
@@ -145,6 +168,13 @@ namespace Tienda.src.Application.Services.Implements
             return result;
         }
 
+        /// <summary>
+        /// Elimina lógicamente una marca, siempre que no tenga productos asociados.
+        /// </summary>
+        /// <param name="id">Identificador de la marca.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Se lanza si la marca no existe o si tiene productos asociados.
+        /// </exception>
         public async Task DeleteAsync(int id)
         {
             var brand = await _context.Brands.FirstOrDefaultAsync(b => b.Id == id);
@@ -159,6 +189,11 @@ namespace Tienda.src.Application.Services.Implements
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Genera un slug URL-friendly a partir de un texto, normalizando tildes y espacios.
+        /// </summary>
+        /// <param name="text">Texto de entrada.</param>
+        /// <returns>Slug normalizado.</returns>
         private static string GenerateSlug(string text)
         {
             text = text.Trim().ToLower();

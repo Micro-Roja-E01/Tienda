@@ -1,12 +1,17 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using Tienda.src.Application.Services.Validators;
 
 namespace Tienda.src.Application.DTO.UserDTO
 {
+    /// <summary>
+    /// DTO utilizado para que el usuario actualice su información de perfil.
+    /// Aplica validaciones de nombre, rut, fecha de nacimiento y teléfono.
+    /// </summary>
     public class UpdateProfileDTO
     {
-        // Nombre
+        /// <summary>
+        /// Nombre del usuario.
+        /// </summary>
         [Required(ErrorMessage = "El nombre es obligatorio.")]
         [RegularExpression(
             @"^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s\-]+$",
@@ -16,7 +21,9 @@ namespace Tienda.src.Application.DTO.UserDTO
         [MaxLength(50, ErrorMessage = "El nombre debe tener máximo 50 letras.")]
         public required string FirstName { get; set; }
 
-        // Apellido
+        /// <summary>
+        /// Apellido del usuario.
+        /// </summary>
         [Required(ErrorMessage = "El apellido es obligatorio.")]
         [RegularExpression(
             @"^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s\-]+$",
@@ -26,7 +33,9 @@ namespace Tienda.src.Application.DTO.UserDTO
         [MaxLength(50, ErrorMessage = "El apellido debe tener máximo 50 letras.")]
         public required string LastName { get; set; }
 
-        // Género
+        /// <summary>
+        /// Género del usuario. Debe ser Masculino, Femenino u Otro.
+        /// </summary>
         [Required(ErrorMessage = "El género es obligatorio.")]
         [RegularExpression(
             @"^(Masculino|Femenino|Otro)$",
@@ -34,12 +43,16 @@ namespace Tienda.src.Application.DTO.UserDTO
         )]
         public required string Gender { get; set; }
 
-        // Fecha de nacimiento
+        /// <summary>
+        /// Fecha de nacimiento del usuario.
+        /// </summary>
         [Required(ErrorMessage = "La fecha de nacimiento es obligatoria.")]
         [BirthDateValidation]
         public required DateTime BirthDate { get; set; }
 
-        // Teléfono
+        /// <summary>
+        /// Número de teléfono chileno (9 dígitos, comienza con 9).
+        /// </summary>
         [Required(ErrorMessage = "El número de teléfono es obligatorio.")]
         [RegularExpression(
             @"^9\d{8}$",
@@ -47,7 +60,9 @@ namespace Tienda.src.Application.DTO.UserDTO
         )]
         public required string PhoneNumber { get; set; }
 
-        // RUT
+        /// <summary>
+        /// RUT del usuario en formato XXXXXXXX-X.
+        /// </summary>
         [Required(ErrorMessage = "El campo RUT es obligatorio.")]
         [RegularExpression(
             @"^\d{7,8}-[0-9kK]$",
@@ -56,7 +71,9 @@ namespace Tienda.src.Application.DTO.UserDTO
         [RutValidation(ErrorMessage = "El Rut no es válido.")]
         public required string Rut { get; set; }
 
-        // Email
+        /// <summary>
+        /// Correo electrónico del usuario.
+        /// </summary>
         [Required(ErrorMessage = "El campo Email es obligatorio.")]
         [EmailAddress(ErrorMessage = "El correo electrónico no es válido.")]
         public required string Email { get; set; }

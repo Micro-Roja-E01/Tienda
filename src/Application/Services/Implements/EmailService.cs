@@ -82,6 +82,11 @@ namespace Tienda.src.Application.Services.Implements
             await _resend.EmailSendAsync(message);
         }
 
+        /// <summary>
+        /// Envía un correo con el código de recuperación de contraseña.
+        /// </summary>
+        /// <param name="email">Correo electrónico del usuario que solicitó la recuperación.</param>
+        /// <param name="code">Código de recuperación que debe ingresar el usuario.</param>
         public async Task SendPasswordRecoveryEmailAsync(string email, string code)
         {
             var htmlBody = await LoadTemplate("PasswordRecoveryCode", code);
