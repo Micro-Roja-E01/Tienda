@@ -36,6 +36,13 @@ namespace tienda.src.Application.Services.Interfaces
         Task<ProductDetailDTO> GetByIdForAdminAsync(int productId);
 
         /// <summary>
+        /// Retorna el detalle completo de un producto con información de auditoría (admin)
+        /// </summary>
+        /// <param name="productId">ID del producto</param>
+        /// <returns>Detalle completo del producto con auditoría</returns>
+        Task<ProductDetailForAdminDTO> GetDetailedByIdForAdminAsync(int productId);
+
+        /// <summary>
         /// Retorna un producto por id para clientes.
         /// </summary>
         /// <param name="productId">ID del producto</param>
@@ -54,7 +61,7 @@ namespace tienda.src.Application.Services.Interfaces
         /// </summary>
         /// <param name="searchParams">Parámetros de búsqueda y filtrado</param>
         /// <returns>Lista paginada de productos para clientes</returns>
-         Task<ListedProductsForCostumerDTO> GetFilteredForCostumerAsync(SearchParamsDTO searchParams);
+        Task<ListedProductsForCostumerDTO> GetFilteredForCostumerAsync(SearchParamsDTO searchParams);
 
 
         /// <summary>
@@ -69,5 +76,27 @@ namespace tienda.src.Application.Services.Interfaces
         /// </summary>
         /// <returns>Tarea que representa la operación asíncrona</returns>
         Task ActivateAllProductsAsync();
+
+        /// <summary>
+        /// Elimina un producto por su id y sus imágenes
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<string> DeleteProductAsync(int id);
+        /// <summary>
+        /// Actualiza un producto existente
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateProductDTO"></param>
+        /// <returns></returns>
+        Task<string> UpdateProductAsync(int id, UpdateProductDTO updateProductDTO);
+
+        /// <summary>
+        /// Restaura un producto eliminado, marcándolo como disponible nuevamente.
+        /// </summary>
+        /// <param name="id">El ID del producto a restaurar.</param>
+        /// <returns>Mensaje de confirmación.</returns>
+        Task<string> RestoreProductAsync(int id);
+
     }
 }
