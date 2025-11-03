@@ -81,9 +81,9 @@ Before running, copy the content of appsettings.example.json into a new file app
 
 ---
 
-## Pruebas de Postman
+## Postman Testing
 
-Puedes probar la API usando la colección de Postman exportada en el archivo `TiendaUCN.postman_collection.json`, junto con su entorno de pruebas `Tienda-UCN.postman_environment.json`
+You can test the API using the exported Postman collection file `TiendaUCN.postman_collection.json`, along with its test environment `Tienda-UCN.postman_environment.json`.
 
 ---
 
