@@ -84,9 +84,9 @@ Before running, copy the content of appsettings.example.json into a new file app
 
 | Nombre completo | Rut | Carrera | Correo institucional |
 |------------------|--------------------|----------|----------------------|
-| Matías Soto | 21708975-1 | Ingeniería Civil en Computación e Informática | matias.soto@alumnos.ucn.cl |
+| Matías Soto Carvajal | 21708975-1 | Ingeniería Civil en Computación e Informática | matias.soto@alumnos.ucn.cl |
 | Sebastián Gálvez Vilchez | 21834204-3 | Ingeniería Civil en Computación e Informática | sebastian.galvez@alumnos.ucn.cl |
-| Joaquín Dublas | 21715440-5 | Ingeniería Civil en Computación e Informática | joaquin.dublas@alumnos.ucn.cl |
+| Joaquín Dublas Henriquez | 21715440-5 | Ingeniería Civil en Computación e Informática | joaquin.dublas@alumnos.ucn.cl |
 
 ---
 
