@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "6874f69c-5a30-4751-8ed9-0a0fdcb642e3",
+		"_postman_id": "c84bf404-3c89-4b62-86aa-5641fb142a41",
 		"name": "TiendaUCN",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "45336862",
-		"_collection_link": "https://sebastian-1581228.postman.co/workspace/35e034d5-5804-4f45-8607-bf312ebcfbfd/collection/45336862-6874f69c-5a30-4751-8ed9-0a0fdcb642e3?action=share&source=collection_link&creator=45336862"
+		"_exporter_id": "47938260"
 	},
 	"item": [
 		{
@@ -44,9 +43,59 @@
 							}
 						},
 						"url": {
-							"raw": "{{Login}}",
+							"raw": "{{baseUrl}}/auth/login",
 							"host": [
-								"{{Login}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Obtener la respuesta JSON\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"// O si prefieres guardarlo en una variable de entorno:\r",
+									"pm.environment.set(\"authToken\", jsonData.data);\r",
+									"\r",
+									"console.log(\"Token guardado: \" + jsonData.data);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"joaquin.dublas@alumnos.ucn.cl\",\n    \"password\": \"Hola1234!\",\n    \"rememberMe\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
 							]
 						}
 					},
@@ -67,9 +116,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{Register}}",
+							"raw": "{{baseUrl}}/auth/register",
 							"host": [
-								"{{Register}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
 							]
 						}
 					},
@@ -90,9 +143,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{Verify}}",
+							"raw": "{{baseUrl}}/auth/verify",
 							"host": [
-								"{{Verify}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"verify"
 							]
 						}
 					},
@@ -113,9 +170,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{ResendVerificationCode}}",
+							"raw": "{{baseUrl}}/auth/resend-email-verification-code",
 							"host": [
-								"{{ResendVerificationCode}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"resend-email-verification-code"
 							]
 						}
 					},
@@ -136,9 +197,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{RecoverPassword}}",
+							"raw": "{{baseUrl}}/auth/recover-password",
 							"host": [
-								"{{RecoverPassword}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"recover-password"
 							]
 						}
 					},
@@ -159,9 +224,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{ResetPassword}}",
+							"raw": "{{baseUrl}}/auth/reset-password",
 							"host": [
-								"{{ResetPassword}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
 							]
 						}
 					},
@@ -182,9 +251,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{Login}}",
+							"raw": "{{baseUrl}}/auth/login",
 							"host": [
-								"{{Login}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
 							]
 						}
 					},
@@ -221,9 +294,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{UserProfile}}",
+							"raw": "{{baseUrl}}/user/profile",
 							"host": [
-								"{{UserProfile}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"profile"
 							]
 						}
 					},
@@ -252,9 +329,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{UserProfile}}",
+							"raw": "{{baseUrl}}/user/profile",
 							"host": [
-								"{{UserProfile}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"profile"
 							]
 						}
 					},
@@ -285,9 +366,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{ChangePassword}}",
+							"raw": "{{baseUrl}}/user/change-password",
 							"host": [
-								"{{ChangePassword}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"change-password"
 							]
 						}
 					},
@@ -304,9 +389,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{Products}}",
+							"raw": "{{baseUrl}}/products",
 							"host": [
-								"{{Products}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
 							]
 						}
 					},
@@ -333,9 +421,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{AdminCategories}}",
+							"raw": "{{baseUrl}}/admin/categories",
 							"host": [
-								"{{AdminCategories}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"categories"
 							]
 						}
 					},
@@ -366,9 +458,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{AdminCategories}}",
+							"raw": "{{baseUrl}}/admin/categories",
 							"host": [
-								"{{AdminCategories}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"categories"
 							]
 						}
 					},
@@ -399,11 +495,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{AdminCategories}}/6",
+							"raw": "{{baseUrl}}/admin/categories/6",
 							"host": [
-								"{{AdminCategories}}"
+								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
+								"categories",
 								"6"
 							]
 						}
@@ -426,11 +524,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{AdminCategories}}/8",
+							"raw": "{{URL}}/admin/categories/8",
 							"host": [
-								"{{AdminCategories}}"
+								"{{URL}}"
 							],
 							"path": [
+								"admin",
+								"categories",
 								"8"
 							]
 						}
@@ -458,9 +558,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{AdminBrands}}",
+							"raw": "{{baseUrl}}/admin/brands",
 							"host": [
-								"{{AdminBrands}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"brands"
 							]
 						}
 					},
@@ -491,9 +595,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{AdminBrands}}",
+							"raw": "{{baseUrl}}/admin/brands",
 							"host": [
-								"{{AdminBrands}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"brands"
 							]
 						}
 					},
@@ -524,11 +632,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{AdminBrands}}/4",
+							"raw": "{{baseUrl}}/admin/brands/4",
 							"host": [
-								"{{AdminBrands}}"
+								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
+								"brands",
 								"4"
 							]
 						}
@@ -551,11 +661,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{AdminBrands}}/4",
+							"raw": "{{baseUrl}}/admin/brands/4",
 							"host": [
-								"{{AdminBrands}}"
+								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
+								"brands",
 								"4"
 							]
 						}
@@ -583,9 +695,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{AdminUser}}?orderBy=lastLogin&orderDir=desc",
+							"raw": "{{baseUrl}}/admin/users?orderBy=lastLogin&orderDir=desc",
 							"host": [
-								"{{AdminUser}}"
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"users"
 							],
 							"query": [
 								{
@@ -617,11 +733,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{AdminUser}}/101",
+							"raw": "{{baseUrl}}/admin/users/101",
 							"host": [
-								"{{AdminUser}}"
+								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
+								"users",
 								"101"
 							]
 						}
@@ -653,11 +771,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{AdminUser}}/3/status",
+							"raw": "{{baseUrl}}/admin/users/3/status",
 							"host": [
-								"{{AdminUser}}"
+								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
+								"users",
 								"3",
 								"status"
 							]
@@ -690,11 +810,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{AdminUser}}/3/role",
+							"raw": "{{baseUrl}}/admin/users/3/role",
 							"host": [
-								"{{AdminUser}}"
+								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
+								"users",
 								"3",
 								"role"
 							]
@@ -745,6 +867,15 @@
 		{
 			"key": "orderId",
 			"value": ""
+		},
+		{
+			"key": "authToken",
+			"value": ""
+		},
+		{
+			"key": "cartId",
+			"value": "",
+			"type": "default"
 		}
 	]
 }
