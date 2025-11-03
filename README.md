@@ -79,6 +79,13 @@ Before running, copy the content of appsettings.example.json into a new file app
 | **Hangfire**                        | Optional configuration for background jobs                                                    |
 | **AllowedUserNameCharacters**       | Allowed characters for usernames                                                              |
 
+---
+
+## Pruebas de Postman
+
+Puedes probar la API usando la colección de Postman exportada en el archivo `TiendaUCN.postman_collection.json`.
+
+---
 
 ##  Integrantes
 

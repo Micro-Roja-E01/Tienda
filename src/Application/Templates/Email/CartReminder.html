@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordatorio de Carrito</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .content p {
+            font-size: 16px;
+            color: #333333;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .content .greeting {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 20px 0;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .cta-button:hover {
+            background-color: #45a049;
+        }
+
+        .footer {
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Tu carrito te está esperando</h1>
+        </div>
+        <div class="content">
+            <div class="icon">🛍️</div>
+            <p class="greeting">¡Hola {{USER_NAME}}!</p>
+            <p>
+                Notamos que dejaste algunos productos en tu carrito de compras.
+                No te preocupes, ¡todavía están ahí esperándote!
+            </p>
+            <p>
+                Tus artículos favoritos podrían agotarse pronto.
+                ¿Por qué no regresas y completas tu compra?
+            </p>
+            <a href="#" class="cta-button">Ver mi carrito</a>
+            <p style="margin-top: 30px; font-size: 14px; color: #666666;">
+                Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.
+            </p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+            <p>&copy; 2025 Tienda UCN. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+
+</html>
