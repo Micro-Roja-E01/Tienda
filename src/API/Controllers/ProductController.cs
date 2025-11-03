@@ -133,7 +133,8 @@ namespace Tienda.src.API.Controllers
             var result = await _productService.GetDetailedByIdForAdminAsync(productId);
             return Ok(new GenericResponse<ProductDetailForAdminDTO>("Detalle completo del producto obtenido exitosamente", result));
         }
-        
+
+        /// <summary>
         /// Crea un nuevo producto enviando el JSON del producto.
         /// Este endpoint está pensado para pruebas o para paneles que no suben archivos.
         /// </summary>
@@ -190,9 +191,8 @@ namespace Tienda.src.API.Controllers
             }
         }
 
-
+        /// <summary>
         /// Activa o desactiva un producto específico.
-        /// Útil para el flujo 6.3 (estado del producto).
         /// </summary>
         /// <param name="id">ID del producto.</param>
         [HttpPatch("admin/{id}/toggle-availability")]
@@ -222,6 +222,11 @@ namespace Tienda.src.API.Controllers
             return Ok(new GenericResponse<string>("Todos los productos han sido activados", "Operación completada exitosamente"));
         }
 
+        /// <summary>
+        /// Elimina un producto específico.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("admin/products/{id:int}")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -234,10 +239,12 @@ namespace Tienda.src.API.Controllers
         {
             try
             {
-                await _productService.DeleteProductAsync(id);
+                var result = await _productService.DeleteProductAsync(id);
 
-                // 204 No Content es el código estándar para DELETE exitoso
-                return NoContent();
+                return Ok(new GenericResponse<string>(
+                    "Producto eliminado exitosamente",
+                    result
+                ));
             }
             catch (KeyNotFoundException ex)
             {
