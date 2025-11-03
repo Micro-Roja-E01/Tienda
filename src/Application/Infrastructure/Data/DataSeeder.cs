@@ -2,10 +2,6 @@ using Bogus;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Tienda.src.Application.Domain.Models;
 
 namespace Tienda.src.Infrastructure.Data
@@ -69,6 +65,13 @@ namespace Tienda.src.Infrastructure.Data
                         new Category { Name = "Home Appliances", Slug = "home-appliances", Description = "Línea blanca y hogar" },
                         new Category { Name = "Books", Slug = "books", Description = "Libros y lectura" },
                         new Category { Name = "Sports", Slug = "sports", Description = "Artículos deportivos" },
+                        new Category { Name = "Toys & Games", Slug = "toys-games", Description = "Juguetes y juegos" },
+                        new Category { Name = "Beauty & Personal Care", Slug = "beauty-personal-care", Description = "Belleza y cuidado personal" },
+                        new Category { Name = "Furniture", Slug = "furniture", Description = "Muebles y decoración" },
+                        new Category { Name = "Automotive", Slug = "automotive", Description = "Automotriz y repuestos" },
+                        new Category { Name = "Garden & Outdoors", Slug = "garden-outdoors", Description = "Jardín y exteriores" },
+                        new Category { Name = "Music Instruments", Slug = "music-instruments", Description = "Instrumentos musicales" },
+                        new Category { Name = "Pet Supplies", Slug = "pet-supplies", Description = "Artículos para mascotas" },
                     };
                     await context.Categories.AddRangeAsync(categories);
                     await context.SaveChangesAsync();
@@ -100,6 +103,23 @@ namespace Tienda.src.Infrastructure.Data
                         new Brand { Name = "Sony", Slug= "sony", Description = "Marca de electrónica japonesa" },
                         new Brand { Name = "Apple", Slug= "apple", Description = "Marca de tecnología estadounidense" },
                         new Brand { Name = "HP", Slug= "hp", Description = "Marca de computadoras e impresoras" },
+                        new Brand { Name = "Samsung", Slug= "samsung", Description = "Marca de electrónica surcoreana" },
+                        new Brand { Name = "LG", Slug= "lg", Description = "Marca de electrodomésticos y electrónica" },
+                        new Brand { Name = "Dell", Slug= "dell", Description = "Marca de computadoras y tecnología" },
+                        new Brand { Name = "Lenovo", Slug= "lenovo", Description = "Marca de computadoras y tablets" },
+                        new Brand { Name = "Nike", Slug= "nike", Description = "Marca deportiva estadounidense" },
+                        new Brand { Name = "Adidas", Slug= "adidas", Description = "Marca deportiva alemana" },
+                        new Brand { Name = "Puma", Slug= "puma", Description = "Marca deportiva alemana" },
+                        new Brand { Name = "Microsoft", Slug= "microsoft", Description = "Marca de software y hardware" },
+                        new Brand { Name = "Canon", Slug= "canon", Description = "Marca de cámaras e impresoras" },
+                        new Brand { Name = "Nikon", Slug= "nikon", Description = "Marca de cámaras y óptica" },
+                        new Brand { Name = "Bosch", Slug= "bosch", Description = "Marca de herramientas y electrodomésticos" },
+                        new Brand { Name = "Panasonic", Slug= "panasonic", Description = "Marca de electrónica japonesa" },
+                        new Brand { Name = "Philips", Slug= "philips", Description = "Marca de electrónica y salud" },
+                        new Brand { Name = "Xiaomi", Slug= "xiaomi", Description = "Marca de tecnología china" },
+                        new Brand { Name = "Asus", Slug= "asus", Description = "Marca de computadoras y componentes" },
+                        new Brand { Name = "Huawei", Slug= "huawei", Description = "Marca de tecnología y telecomunicaciones" },
+                        new Brand { Name = "JBL", Slug= "jbl", Description = "Marca de audio y altavoces" },
                     };
                     await context.Brands.AddRangeAsync(brands);
                     await context.SaveChangesAsync();
@@ -138,7 +158,7 @@ namespace Tienda.src.Infrastructure.Data
                             "El rol de administrador no está configurado."
                         );
 
-                    // Creación de usuario administrador
+                    // Creación de usuario administrador segun appsettings.json
                     User adminUser = new User
                     {
                         FirstName =
@@ -212,6 +232,52 @@ namespace Tienda.src.Infrastructure.Data
                             "No se pudo crear el usuario administrador."
                         );
                     }
+
+                    // Creación de usuario administrador por defecto del sistema
+                    User systemAdminUser = new User
+                    {
+                        FirstName = "Admin",
+                        LastName = "Sistema",
+                        Email = "admin@tiendaucn.cl",
+                        EmailConfirmed = true,
+                        Gender = Gender.Otro,
+                        Rut = "11111111-1",
+                        BirthDate = new DateTime(1990, 1, 1),
+                        PhoneNumber = "+569 00000000",
+                        Status = UserStatus.Active,
+                        LastLoginAt = null
+                    };
+                    systemAdminUser.UserName = systemAdminUser.Email;
+                    var systemAdminPassword = "Admin123!";
+                    var systemAdminResult = await userManager.CreateAsync(systemAdminUser, systemAdminPassword);
+                    if (systemAdminResult.Succeeded)
+                    {
+                        var systemRoleResult = await userManager.AddToRoleAsync(
+                            systemAdminUser,
+                            adminRole.Name!
+                        );
+                        if (!systemRoleResult.Succeeded)
+                        {
+                            Log.Error(
+                                "Error asignando rol de administrador al usuario del sistema: {Errors}",
+                                string.Join(", ", systemRoleResult.Errors.Select(e => e.Description))
+                            );
+                            throw new InvalidOperationException(
+                                "No se pudo asignar el rol de administrador al usuario del sistema."
+                            );
+                        }
+                        Log.Information("Usuario administrador del sistema creado con éxito.");
+                    }
+                    else
+                    {
+                        Log.Error(
+                            "Error creando usuario administrador por defecto del sistema: {Errors}",
+                            string.Join(", ", systemAdminResult.Errors.Select(e => e.Description))
+                        );
+                        throw new InvalidOperationException(
+                            "No se pudo crear el usuario administrador por defecto del sistema."
+                        );
+                    }
                     // Creación de usuarios aleatorios
                     var randomPassword =
                         configuration["User:RandomUserPassword"]
@@ -281,7 +347,8 @@ namespace Tienda.src.Infrastructure.Data
                             .RuleFor(p => p.Stock, f => f.Random.Int(1, 100))
                             .RuleFor(p => p.CategoryId, f => f.PickRandom(categoryIds))
                             .RuleFor(p => p.BrandId, f => f.PickRandom(brandIds))
-                            .RuleFor(p => p.Status, f => f.PickRandom<Status>());
+                            .RuleFor(p => p.Status, f => f.PickRandom<Status>())
+                            .RuleFor(p => p.IsAvailable, _ => true);
 
                         var products = productFaker.Generate(50);
                         await context.Products.AddRangeAsync(products);

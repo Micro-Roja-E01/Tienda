@@ -114,7 +114,7 @@ namespace tienda.src.Infrastructure.Repositories.Implements
         {
             var result = await _context.Products.
                                         AsNoTracking().
-                                        Where(p => p.Id == id && !p.IsAvailable).
+                                        Where(p => p.Id == id && p.IsAvailable).
                                         Include(p => p.Category).
                                         Include(p => p.Brand).
                                         Include(p => p.Images)

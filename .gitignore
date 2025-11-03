@@ -503,3 +503,5 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+tienda.db-shm
+tienda.db-wal

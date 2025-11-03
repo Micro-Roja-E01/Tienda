@@ -1,23 +1,42 @@
 {
 	"info": {
-		"_postman_id": "755a3b77-3449-47ca-98e2-467b7e8d67d8",
+		"_postman_id": "6874f69c-5a30-4751-8ed9-0a0fdcb642e3",
 		"name": "TiendaUCN",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "45458670",
-		"_collection_link": "https://joaquind-2113049.postman.co/workspace/Joaquin-D's-Workspace~20cd15dd-2e00-4212-8232-83fc1c6206c3/collection/45458670-755a3b77-3449-47ca-98e2-467b7e8d67d8?action=share&source=collection_link&creator=45458670"
+		"_exporter_id": "45336862",
+		"_collection_link": "https://sebastian-1581228.postman.co/workspace/35e034d5-5804-4f45-8607-bf312ebcfbfd/collection/45336862-6874f69c-5a30-4751-8ed9-0a0fdcb642e3?action=share&source=collection_link&creator=45336862"
 	},
 	"item": [
 		{
 			"name": "Auth",
 			"item": [
 				{
-					"name": "Login",
+					"name": "LoginAdmin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Obtener la respuesta JSON\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"// O si prefieres guardarlo en una variable de entorno:\r",
+									"pm.environment.set(\"adminToken\", jsonData.data);\r",
+									"\r",
+									"console.log(\"Token guardado: \" + jsonData.data);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"matias.soto01@alumnos.ucn.cl\",\n    \"password\": \"Hola1234!\",\n    \"rememberMe\": true\n}",
+							"raw": "{\n    \"email\": \"admin@tiendaucn.cl\",\n    \"password\": \"Admin123!\",\n    \"rememberMe\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -25,13 +44,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/auth/login",
+							"raw": "{{Login}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"auth",
-								"login"
+								"{{Login}}"
 							]
 						}
 					},
@@ -44,7 +59,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"matias.soto01@alumnos.ucn.cl\",\n    \"password\": \"Hola1234!\",\n    \"confirmPassword\": \"Hola1234!\",\n    \"rut\": \"20260767-5\",\n    \"firstName\": \"Matias\",\n    \"lastName\": \"Soto\",\n    \"birthDate\": \"2004-11-19\",\n    \"phoneNumber\": \"995677742\",\n    \"gender\": \"Masculino\"\n}",
+							"raw": "{\n    \"email\": \"joaquin.dublas@alumnos.ucn.cl\",\n    \"password\": \"Hola1234!\",\n    \"confirmPassword\": \"Hola1234!\",\n    \"rut\": \"21715440-5\",\n    \"firstName\": \"Joaquin\",\n    \"lastName\": \"Dublas\",\n    \"birthDate\": \"2004-11-27\",\n    \"phoneNumber\": \"945442593\",\n    \"gender\": \"Masculino\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -52,13 +67,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/auth/register",
+							"raw": "{{Register}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"auth",
-								"register"
+								"{{Register}}"
 							]
 						}
 					},
@@ -71,7 +82,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"matias.soto01@alumnos.ucn.cl\",\n    \"verificationCode\": \"185501\"\n}",
+							"raw": "{\n    \"email\": \"joaquin.dublas@alumnos.ucn.cl\",\n    \"verificationCode\": \"928722\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -79,13 +90,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/auth/verify-email",
+							"raw": "{{Verify}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"auth",
-								"verify-email"
+								"{{Verify}}"
 							]
 						}
 					},
@@ -106,13 +113,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/auth/resend-email-verification-code",
+							"raw": "{{ResendVerificationCode}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"auth",
-								"resend-email-verification-code"
+								"{{ResendVerificationCode}}"
 							]
 						}
 					},
@@ -133,13 +136,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/auth/recover-password",
+							"raw": "{{RecoverPassword}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"auth",
-								"recover-password"
+								"{{RecoverPassword}}"
 							]
 						}
 					},
@@ -152,7 +151,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"matias.soto01@alumnos.ucn.cl\",\n  \"recoveryCode\": \"614563\",\n  \"newPassword\": \"MiNuevaPassword123!\"\n}",
+							"raw": "{\n  \"email\": \"matias.soto01@alumnos.ucn.cl\",\n  \"recoveryCode\": \"614563\",\n  \"newPassword\": \"Test123!\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -160,13 +159,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/auth/reset-password",
+							"raw": "{{ResetPassword}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"auth",
-								"reset-password"
+								"{{ResetPassword}}"
 							]
 						}
 					},
@@ -179,7 +174,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"matias.soto01@alumnos.ucn.cl\",\n    \"password\": \"MiNuevaPassword123!\",\n    \"rememberMe\": true\n}",
+							"raw": "{\n    \"email\": \"matias.soto01@alumnos.ucn.cl\",\n    \"password\": \"Test123!\",\n    \"rememberMe\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -187,13 +182,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/auth/login",
+							"raw": "{{Login}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"auth",
-								"login"
+								"{{Login}}"
 							]
 						}
 					},
@@ -230,13 +221,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/user/profile",
+							"raw": "{{UserProfile}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"user",
-								"profile"
+								"{{UserProfile}}"
 							]
 						}
 					},
@@ -244,9 +231,32 @@
 				},
 				{
 					"name": "getProfile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{UserProfile}}",
+							"host": [
+								"{{UserProfile}}"
+							]
+						}
 					},
 					"response": []
 				},
@@ -275,44 +285,11 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/user/change-password",
+							"raw": "{{ChangePassword}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"user",
-								"change-password"
+								"{{ChangePassword}}"
 							]
 						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Products",
-			"item": [
-				{
-					"name": "costumerProducts",
-					"request": {
-						"method": "GET",
-						"header": []
-					},
-					"response": []
-				},
-				{
-					"name": "activateProducts",
-					"request": {
-						"method": "GET",
-						"header": []
-					},
-					"response": []
-				},
-				{
-					"name": "New Request",
-					"request": {
-						"method": "GET",
-						"header": []
 					},
 					"response": []
 				}
@@ -322,17 +299,14 @@
 			"name": "Catalog",
 			"item": [
 				{
-					"name": "getCatalogo",
+					"name": "getCatalog",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{URL}}/products",
+							"raw": "{{Products}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"products"
+								"{{Products}}"
 							]
 						}
 					},
@@ -346,25 +320,55 @@
 				{
 					"name": "GetCategories",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{AdminCategories}}",
+							"host": [
+								"{{AdminCategories}}"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "PostCategories",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Gamer\",\r\n  \"description\": \"Gaming chairs, gamer mouse.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{URL}}/admin/categories/2",
+							"raw": "{{AdminCategories}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"admin",
-								"categories",
-								"2"
+								"{{AdminCategories}}"
 							]
 						}
 					},
@@ -385,14 +389,22 @@
 						},
 						"method": "PUT",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Gamer Zone\",\r\n  \"description\": \"Todo para gaming avanzado.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{URL}}/admin/categories",
+							"raw": "{{AdminCategories}}/6",
 							"host": [
-								"{{URL}}"
+								"{{AdminCategories}}"
 							],
 							"path": [
-								"admin",
-								"categories"
+								"6"
 							]
 						}
 					},
@@ -414,13 +426,11 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{URL}}/admin/categories/8",
+							"raw": "{{AdminCategories}}/8",
 							"host": [
-								"{{URL}}"
+								"{{AdminCategories}}"
 							],
 							"path": [
-								"admin",
-								"categories",
 								"8"
 							]
 						}
@@ -435,25 +445,55 @@
 				{
 					"name": "getBrands",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{AdminBrands}}",
+							"host": [
+								"{{AdminBrands}}"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "postBrand",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Prueba brand\",\r\n  \"description\": \"marca de prueba\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{URL}}/admin/brands/1",
+							"raw": "{{AdminBrands}}",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"admin",
-								"brands",
-								"1"
+								"{{AdminBrands}}"
 							]
 						}
 					},
@@ -476,7 +516,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Sony\",\r\n  \"description\": \"Marca de electrónica japonesa.\"\r\n}",
+							"raw": "{\r\n  \"name\": \"Marki\",\r\n  \"description\": \"Marca de electrónica japonesa.\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -484,14 +524,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}/admin/brands/6",
+							"raw": "{{AdminBrands}}/4",
 							"host": [
-								"{{URL}}"
+								"{{AdminBrands}}"
 							],
 							"path": [
-								"admin",
-								"brands",
-								"6"
+								"4"
 							]
 						}
 					},
@@ -500,17 +538,25 @@
 				{
 					"name": "Delete",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{URL}}/admin/brands/1",
+							"raw": "{{AdminBrands}}/4",
 							"host": [
-								"{{URL}}"
+								"{{AdminBrands}}"
 							],
 							"path": [
-								"admin",
-								"brands",
-								"1"
+								"4"
 							]
 						}
 					},
@@ -537,23 +583,120 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{URL}}/admin/users?page=1&pageSize=10",
+							"raw": "{{AdminUser}}?orderBy=lastLogin&orderDir=desc",
 							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"admin",
-								"users"
+								"{{AdminUser}}"
 							],
 							"query": [
 								{
-									"key": "page",
-									"value": "1"
+									"key": "orderBy",
+									"value": "lastLogin"
 								},
 								{
-									"key": "pageSize",
-									"value": "10"
+									"key": "orderDir",
+									"value": "desc"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUsers/id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AdminUser}}/101",
+							"host": [
+								"{{AdminUser}}"
+							],
+							"path": [
+								"101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchBloquear",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": \"blocked\",\r\n  \"reason\": \"Incumplió las políticas\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{AdminUser}}/3/status",
+							"host": [
+								"{{AdminUser}}"
+							],
+							"path": [
+								"3",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchRol",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"role\": \"Admin\",\r\n  \"reason\": \"Necesita acceso al panel\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{AdminUser}}/3/role",
+							"host": [
+								"{{AdminUser}}"
+							],
+							"path": [
+								"3",
+								"role"
 							]
 						}
 					},
@@ -588,7 +731,7 @@
 	],
 	"variable": [
 		{
-			"key": "URL",
+			"key": "baseUrl",
 			"value": ""
 		},
 		{
@@ -597,8 +740,11 @@
 		},
 		{
 			"key": "adminToken",
-			"value": "",
-			"type": "default"
+			"value": ""
+		},
+		{
+			"key": "orderId",
+			"value": ""
 		}
 	]
 }
