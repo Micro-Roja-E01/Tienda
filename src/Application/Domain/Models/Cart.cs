@@ -40,6 +40,11 @@ namespace Tienda.src.Application.Domain.Models
         public int? UserId { get; set; }
 
         /// <summary>
+        /// Usuario registrado que posee el carrito de compras.
+        /// </summary>
+        public User? User { get; set; }
+
+        /// <summary>
         /// Lista de artículos en el carrito de compras.
         /// </summary>
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();

@@ -429,5 +429,19 @@ namespace Tienda.src.Application.Services.Implements
             Log.Information("Totales recalculados. SubTotal: {SubTotal}, Total: {Total}, Descuento aplicado: {TotalSaved}, Items únicos: {UniqueItems}",
                 cart.SubTotal, cart.Total, cart.TotalSavedAmount, cart.TotalUniqueItemsCount);
         }
+
+        /// <summary>
+        /// Obtiene todos los carritos de usuarios registrados que no han sido modificados
+        /// en el número de días especificado y que tienen items.
+        /// </summary>
+        /// <param name="inactiveDays">Número de días sin modificaciones</param>
+        /// <returns>Lista de carritos inactivos con información del usuario</returns>
+        public async Task<List<(int UserId, string Email, string UserName, DateTime LastModified)>> GetInactiveCartsAsync(int inactiveDays)
+        {
+            Log.Information("Buscando carritos inactivos de más de {InactiveDays} días", inactiveDays);
+            var inactiveCarts = await _cartRepository.GetInactiveCartsAsync(inactiveDays);
+            Log.Information("Se encontraron {Count} carritos inactivos", inactiveCarts.Count);
+            return inactiveCarts;
+        }
     }
 }

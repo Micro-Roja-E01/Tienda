@@ -13,6 +13,7 @@ using tienda.src.Infrastructure.Repositories.Interfaces;
 using Tienda.src.API.Middlewares;
 using Tienda.src.Application.Domain.Models;
 using Tienda.src.Application.Jobs;
+using Tienda.src.Application.Jobs.Implements;
 using Tienda.src.Application.Jobs.Interfaces;
 using Tienda.src.Application.Mappers;
 using Tienda.src.Application.Services.Implements;
@@ -70,6 +71,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserJob, UserJob>();
+builder.Services.AddScoped<ICartJob, CartJob>();
 #endregion
 
 #region Email Service Configuration
@@ -254,6 +256,8 @@ Log.Information("Aplicando migraciones a la base de datos");
 using (var scope = app.Services.CreateScope())
 {
     await DataSeeder.Initialize(scope.ServiceProvider);
+
+    // Job para eliminar usuarios no confirmados
     var jobId = nameof(UserJob.DeleteUnconfirmedAsync);
     RecurringJob.AddOrUpdate<UserJob>(
         jobId,
@@ -262,8 +266,26 @@ using (var scope = app.Services.CreateScope())
         new RecurringJobOptions { TimeZone = timeZone }
     );
     Log.Information(
-        $"Job recurrente '{jobId}' configurando con cron: {cronExpression} en zona horaria {timeZone.Id}"
+        $"Job recurrente '{jobId}' configurado con cron: {cronExpression} en zona horaria {timeZone.Id}"
     );
+
+    // Job para enviar recordatorios de carrito
+    var cartReminderCron =
+        builder.Configuration["Jobs:CronJobCartReminder"]
+        ?? throw new InvalidOperationException(
+            "La expresión cron para recordatorios de carrito no está configurada."
+        );
+    var cartJobId = nameof(CartJob.SendCartRemindersAsync);
+    RecurringJob.AddOrUpdate<CartJob>(
+        cartJobId,
+        job => job.SendCartRemindersAsync(),
+        cartReminderCron,
+        new RecurringJobOptions { TimeZone = timeZone }
+    );
+    Log.Information(
+        $"Job recurrente '{cartJobId}' configurado con cron: {cartReminderCron} en zona horaria {timeZone.Id}"
+    );
+
     MapperExtensions.ConfigureMapster(scope.ServiceProvider);
 }
 #endregion

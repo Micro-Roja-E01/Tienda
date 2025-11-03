@@ -18,5 +18,12 @@ namespace Tienda.src.Application.Services.Interfaces
         /// <param name="email">El correo electrónico del usuario.</param>
         Task SendWelcomeEmailAsync(string email);
         Task SendPasswordRecoveryEmailAsync(string email, string code);
+
+        /// <summary>
+        /// Envía un recordatorio por correo electrónico sobre el carrito abandonado.
+        /// </summary>
+        /// <param name="email">El correo electrónico del usuario.</param>
+        /// <param name="userName">El nombre del usuario.</param>
+        Task SendCartReminderEmailAsync(string email, string userName);
     }
 }

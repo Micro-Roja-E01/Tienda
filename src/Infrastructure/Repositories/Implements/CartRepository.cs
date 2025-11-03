@@ -174,5 +174,31 @@ namespace Tienda.src.Infrastructure.Repositories.Implements
                     .ThenInclude(p => p.Images)
                 .LoadAsync();
         }
+
+        /// <summary>
+        /// Obtiene los carritos de usuarios registrados que no han sido modificados
+        /// en el número de días especificado y que tienen items.
+        /// </summary>
+        /// <param name="inactiveDays">Número de días sin modificaciones</param>
+        /// <returns>Lista de tuplas con UserId, Email, UserName y LastModified</returns>
+        public async Task<List<(int UserId, string Email, string UserName, DateTime LastModified)>> GetInactiveCartsAsync(int inactiveDays)
+        {
+            var cutoffDate = DateTime.UtcNow.AddDays(-inactiveDays);
+
+            var inactiveCarts = await _context.Carts
+                .Where(c => c.UserId != null
+                    && c.UpdatedAt < cutoffDate
+                    && c.CartItems.Any())
+                .Include(c => c.User)
+                .Select(c => new ValueTuple<int, string, string, DateTime>(
+                    c.UserId!.Value,
+                    c.User!.Email!,
+                    c.User.FirstName + " " + c.User.LastName,
+                    c.UpdatedAt
+                ))
+                .ToListAsync();
+
+            return inactiveCarts;
+        }
     }
 }

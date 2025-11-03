@@ -80,5 +80,13 @@ namespace Tienda.src.Application.Services.Interfaces
         /// <param name="userId">ID del usuario autenticado (opcional, null para anónimos)</param>
         /// <returns>El carrito existente o uno nuevo</returns>
         Task<CartDTO> CreateOrGetCartAsync(string buyerId, int? userId = null);
+
+        /// <summary>
+        /// Obtiene todos los carritos de usuarios registrados que no han sido modificados
+        /// en el número de días especificado y que tienen items.
+        /// </summary>
+        /// <param name="inactiveDays">Número de días sin modificaciones</param>
+        /// <returns>Lista de carritos inactivos con información del usuario</returns>
+        Task<List<(int UserId, string Email, string UserName, DateTime LastModified)>> GetInactiveCartsAsync(int inactiveDays);
     }
 }

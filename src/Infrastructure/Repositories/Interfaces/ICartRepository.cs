@@ -67,5 +67,13 @@ namespace Tienda.src.Infrastructure.Repositories.Interfaces
         /// </summary>
         /// <param name="cartItem">Item a eliminar</param>
         Task RemoveItemAsync(CartItem cartItem);
+
+        /// <summary>
+        /// Obtiene los carritos de usuarios registrados que no han sido modificados
+        /// en el número de días especificado y que tienen items.
+        /// </summary>
+        /// <param name="inactiveDays">Número de días sin modificaciones</param>
+        /// <returns>Lista de tuplas con UserId, Email, UserName y LastModified</returns>
+        Task<List<(int UserId, string Email, string UserName, DateTime LastModified)>> GetInactiveCartsAsync(int inactiveDays);
     }
 }
