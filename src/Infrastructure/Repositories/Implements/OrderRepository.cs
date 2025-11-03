@@ -6,12 +6,23 @@ using Tienda.src.Infrastructure.Repositories.Interfaces;
 
 namespace Tienda.src.Infrastructure.Repositories.Implements
 {
+    /// <summary>
+    /// Implementación del repositorio de órdenes.
+    /// Maneja todas las operaciones de acceso a datos para órdenes de compra y sus items,
+    /// incluyendo búsqueda, paginación y validación de unicidad de códigos.
+    /// </summary>
     public class OrderRepository : IOrderRepository
     {
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
         private readonly int _defaultPageSize;
 
+        /// <summary>
+        /// Constructor que inyecta dependencias y carga configuración.
+        /// </summary>
+        /// <param name="context">Contexto de Entity Framework para acceso a datos</param>
+        /// <param name="configuration">Configuración para obtener tamaño de página por defecto</param>
+        /// <exception cref="InvalidOperationException">Si DefaultPageSize no está configurado</exception>
         public OrderRepository(DataContext context, IConfiguration configuration)
         {
             _context = context;

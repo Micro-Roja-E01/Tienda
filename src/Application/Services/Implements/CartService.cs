@@ -8,17 +8,39 @@ using Tienda.src.Infrastructure.Repositories.Interfaces;
 
 namespace Tienda.src.Application.Services.Implements
 {
+    /// <summary>
+    /// Implementación del servicio de carrito de compras.
+    /// Gestiona la lógica de negocio para operaciones de carrito, validaciones de stock,
+    /// cálculo de totales y manejo de carritos anónimos y autenticados.
+    /// </summary>
     public class CartService : ICartService
     {
         private readonly ICartRepository _cartRepository;
         private readonly IProductRepository _productRepository;
 
+        /// <summary>
+        /// Constructor que inyecta las dependencias necesarias.
+        /// </summary>
+        /// <param name="cartRepository">Repositorio para acceso a datos de carritos</param>
+        /// <param name="productRepository">Repositorio para validación de productos y stock</param>
         public CartService(ICartRepository cartRepository, IProductRepository productRepository)
         {
             _cartRepository = cartRepository;
             _productRepository = productRepository;
         }
 
+        /// <summary>
+        /// Agrega un producto al carrito o incrementa su cantidad si ya existe.
+        /// Realiza validaciones de existencia del producto y disponibilidad de stock.
+        /// Crea un nuevo carrito si no existe uno para el buyerId especificado.
+        /// </summary>
+        /// <param name="buyerId">Identificador único del comprador</param>
+        /// <param name="productId">ID del producto a agregar</param>
+        /// <param name="quantity">Cantidad de unidades a agregar</param>
+        /// <param name="userId">ID del usuario autenticado (opcional)</param>
+        /// <returns>El carrito actualizado con el nuevo item</returns>
+        /// <exception cref="KeyNotFoundException">Si el producto no existe</exception>
+        /// <exception cref="ArgumentException">Si no hay suficiente stock disponible</exception>
         public async Task<CartDTO> AddItemAsync(string buyerId, int productId, int quantity, int? userId = null)
         {
             Cart? cart = await _cartRepository.FindAsync(buyerId, userId);
@@ -76,6 +98,16 @@ namespace Tienda.src.Application.Services.Implements
             return cart.Adapt<CartDTO>();
         }
 
+        /// <summary>
+        /// Asocia un carrito anónimo con un usuario que acaba de autenticarse.
+        /// Si el usuario ya tiene un carrito:
+        /// - Fusiona ambos carritos sumando cantidades de productos duplicados
+        /// - Elimina el carrito anónimo después de la fusión
+        /// Si el usuario no tiene carrito:
+        /// - Simplemente asocia el carrito anónimo con el userId
+        /// </summary>
+        /// <param name="buyerId">Identificador del carrito anónimo</param>
+        /// <param name="userId">ID del usuario autenticado</param>
         public async Task AssociateWithUserAsync(string buyerId, int userId)
         {
             Cart? cart = await _cartRepository.GetAnonymousAsync(buyerId);
@@ -112,6 +144,20 @@ namespace Tienda.src.Application.Services.Implements
                 Log.Information("Carrito anónimo asociado con usuario. BuyerId: {BuyerId} → UserId: {UserId}", buyerId, userId);
             }
         }
+
+        /// <summary>
+        /// Valida y ajusta el carrito antes del checkout.
+        /// Realiza las siguientes acciones:
+        /// - Verifica el stock real de cada producto
+        /// - Elimina productos que estén agotados (stock = 0)
+        /// - Ajusta cantidades que excedan el stock disponible
+        /// - Recalcula los totales del carrito
+        /// </summary>
+        /// <param name="buyerId">Identificador único del comprador</param>
+        /// <param name="userId">ID del usuario autenticado (opcional)</param>
+        /// <returns>El carrito validado y ajustado</returns>
+        /// <exception cref="KeyNotFoundException">Si el carrito no existe</exception>
+        /// <exception cref="InvalidOperationException">Si el carrito está vacío</exception>
         public async Task<CartDTO> CheckoutAsync(string buyerId, int? userId)
         {
             Cart? cart = await _cartRepository.FindAsync(buyerId, userId);
@@ -166,6 +212,14 @@ namespace Tienda.src.Application.Services.Implements
             return cart.Adapt<CartDTO>();
         }
 
+        /// <summary>
+        /// Vacía completamente el carrito eliminando todos sus items.
+        /// Establece todos los totales en cero.
+        /// </summary>
+        /// <param name="buyerId">Identificador único del comprador</param>
+        /// <param name="userId">ID del usuario autenticado (opcional)</param>
+        /// <returns>El carrito vacío</returns>
+        /// <exception cref="KeyNotFoundException">Si el carrito no existe</exception>
         public async Task<CartDTO> ClearAsync(string buyerId, int? userId = null)
         {
             Cart? cart = await _cartRepository.FindAsync(buyerId, userId);
@@ -183,6 +237,14 @@ namespace Tienda.src.Application.Services.Implements
             return cart.Adapt<CartDTO>();
         }
 
+        /// <summary>
+        /// Obtiene un carrito existente o crea uno nuevo si no existe.
+        /// Para usuarios autenticados, busca primero por buyerId y userId,
+        /// luego solo por userId para recuperar carritos existentes del usuario.
+        /// </summary>
+        /// <param name="buyerId">Identificador único del comprador</param>
+        /// <param name="userId">ID del usuario autenticado (opcional)</param>
+        /// <returns>El carrito existente o uno nuevo recién creado</returns>
         public async Task<CartDTO> CreateOrGetCartAsync(string buyerId, int? userId)
         {
             Cart? cart = await _cartRepository.FindAsync(buyerId, userId);
@@ -203,6 +265,15 @@ namespace Tienda.src.Application.Services.Implements
             return cart.Adapt<CartDTO>();
         }
 
+        /// <summary>
+        /// Elimina completamente un producto del carrito.
+        /// Recalcula los totales después de eliminar el item.
+        /// </summary>
+        /// <param name="buyerId">Identificador único del comprador</param>
+        /// <param name="productId">ID del producto a eliminar</param>
+        /// <param name="userId">ID del usuario autenticado (opcional)</param>
+        /// <returns>El carrito actualizado sin el producto</returns>
+        /// <exception cref="KeyNotFoundException">Si el carrito o el producto no existen</exception>
         public async Task<CartDTO> RemoveItemAsync(string buyerId, int productId, int? userId = null)
         {
             Cart? cart = await _cartRepository.FindAsync(buyerId, userId);
@@ -227,6 +298,18 @@ namespace Tienda.src.Application.Services.Implements
             return cart.Adapt<CartDTO>();
         }
 
+        /// <summary>
+        /// Actualiza la cantidad de un producto específico en el carrito.
+        /// Si la cantidad es 0, elimina el producto del carrito.
+        /// Valida que haya suficiente stock disponible para la nueva cantidad.
+        /// </summary>
+        /// <param name="buyerId">Identificador único del comprador</param>
+        /// <param name="productId">ID del producto a actualizar</param>
+        /// <param name="quantity">Nueva cantidad (0 para eliminar)</param>
+        /// <param name="userId">ID del usuario autenticado (opcional)</param>
+        /// <returns>El carrito actualizado</returns>
+        /// <exception cref="KeyNotFoundException">Si el carrito, producto o item no existen</exception>
+        /// <exception cref="ArgumentException">Si no hay suficiente stock</exception>
         public async Task<CartDTO> UpdateItemQuantityAsync(string buyerId, int productId, int quantity, int? userId = null)
         {
             Cart? cart = await _cartRepository.FindAsync(buyerId, userId);

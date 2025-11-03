@@ -4,12 +4,25 @@ using Tienda.src.Application.DTO.OrderDTO;
 
 namespace Tienda.src.Application.Mappers
 {
+    /// <summary>
+    /// Clase responsable de configurar los mapeos entre entidades del dominio de órdenes y sus DTOs.
+    /// Utiliza Mapster para definir transformaciones entre Order/OrderItem, Cart/CartItem y sus respectivos DTOs.
+    /// Incluye lógica para:
+    /// - Conversión de carrito a orden (snapshot histórico)
+    /// - Formateo de precios y fechas
+    /// - Manejo de zona horaria para fechas de compra
+    /// </summary>
     public class OrderMapper
     {
         private readonly IConfiguration _configuration;
         private readonly string _defaultImageURL;
         private readonly TimeZoneInfo _timeZone;
 
+        /// <summary>
+        /// Constructor que inicializa el mapper con configuración y zona horaria.
+        /// </summary>
+        /// <param name="configuration">Configuración de la aplicación para obtener valores como la URL de imagen por defecto</param>
+        /// <exception cref="InvalidOperationException">Se lanza si la URL de imagen por defecto no está configurada</exception>
         public OrderMapper(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -17,12 +30,21 @@ namespace Tienda.src.Application.Mappers
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
         }
 
+        /// <summary>
+        /// Configura todos los mapeos relacionados con órdenes.
+        /// Debe llamarse al inicio de la aplicación para registrar las configuraciones en Mapster.
+        /// </summary>
         public void ConfigureAllMappings()
         {
             ConfigureOrderItemsMappings();
             ConfigureOrderMappings();
         }
 
+        /// <summary>
+        /// Configura los mapeos de órdenes:
+        /// 1. Order → OrderDetailDTO: Convierte la orden a DTO con formato de moneda y conversión de zona horaria
+        /// 2. Cart → Order: Transforma el carrito en una orden, copiando totales y convirtiendo CartItems a OrderItems
+        /// </summary>
         public void ConfigureOrderMappings()
         {
             TypeAdapterConfig<Order, OrderDetailDTO>.NewConfig()
@@ -41,6 +63,14 @@ namespace Tienda.src.Application.Mappers
                 .Ignore(dest => dest.CreatedAt);
         }
 
+        /// <summary>
+        /// Configura los mapeos de items de órdenes:
+        /// 1. OrderItem → OrderItemDTO: Convierte el item de orden a DTO formateando el precio como moneda
+        /// 2. CartItem → OrderItem: Transforma items del carrito en items de orden, creando un snapshot histórico
+        ///    - Captura título, descripción, imagen y precio del producto en el momento de la compra
+        ///    - Usa imagen por defecto si el producto no tiene imágenes
+        ///    - Ignora propiedades autogeneradas (Id, OrderId, relaciones)
+        /// </summary>
         public void ConfigureOrderItemsMappings()
         {
             TypeAdapterConfig<OrderItem, OrderItemDTO>.NewConfig()
