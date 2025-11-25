@@ -146,45 +146,45 @@ builder.Host.UseSerilog(
 #endregion
 
 #region CORS Configuration
-// Log.Information("Configurando CORS");
-// try
-// {
-//     var allowedOrigins =
-//         builder.Configuration.GetSection("CORS:AllowedOrigins").Get<string[]>()
-//         ?? throw new InvalidOperationException(
-//             "Los orígenes permitidos CORS no están configurados."
-//         );
-//     var allowedMethods =
-//         builder.Configuration.GetSection("CORS:AllowedMethods").Get<string[]>()
-//         ?? throw new InvalidOperationException(
-//             "Los métodos permitidos CORS no están configurados."
-//         );
-//     var allowedHeaders =
-//         builder.Configuration.GetSection("CORS:AllowedHeaders").Get<string[]>()
-//         ?? throw new InvalidOperationException(
-//             "Los encabezados permitidos CORS no están configurados."
-//         );
-//     builder.Services.AddCors(options =>
-//     {
-//         options.AddPolicy(
-//             "AllowAllOrigins",
-//             policy =>
-//                 policy
-//                     .WithOrigins(allowedOrigins)
-//                     .WithMethods(allowedMethods)
-//                     .WithHeaders(allowedHeaders)
-//         );
-//     });
-// }
-// catch (Exception ex)
-// {
-//     Log.Error(ex, "Error al configurar CORS");
-//     throw;
-// }
+Log.Information("Configurando CORS");
+try
+{
+    var allowedOrigins =
+        builder.Configuration.GetSection("CORS:AllowedOrigins").Get<string[]>()
+        ?? throw new InvalidOperationException(
+            "Los orígenes permitidos CORS no están configurados."
+        );
+    var allowedMethods =
+        builder.Configuration.GetSection("CORS:AllowedMethods").Get<string[]>()
+        ?? throw new InvalidOperationException(
+            "Los métodos permitidos CORS no están configurados."
+        );
+    var allowedHeaders =
+        builder.Configuration.GetSection("CORS:AllowedHeaders").Get<string[]>()
+        ?? throw new InvalidOperationException(
+            "Los encabezados permitidos CORS no están configurados."
+        );
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(
+            "AllowAllOrigins",
+            policy =>
+                policy
+                    .WithOrigins(allowedOrigins)
+                    .WithMethods(allowedMethods)
+                    .WithHeaders(allowedHeaders).AllowCredentials()
+        );
+    });
+}
+catch (Exception ex)
+{
+    Log.Error(ex, "Error al configurar CORS");
+    throw;
+}
 #endregion
 
 #region Database Configuration
-// Log.Information("Configurando base de datos SQLite");
+Log.Information("Configurando base de datos SQLite");
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlite(connectionString));
 #endregion
 
@@ -304,6 +304,7 @@ if (app.Environment.IsDevelopment())
 #region Pipeline Configuration
 // Pipeline básico
 app.MapOpenApi();
+app.UseCors("AllowAllOrigins");
 
 // Usar Middleware para el manejo global de excepciones
 app.UseMiddleware<ExceptionHandlingMiddleware>();
