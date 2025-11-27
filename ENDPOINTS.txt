@@ -1,0 +1,528 @@
+================================================================================
+                    DOCUMENTACIÓN DE ENDPOINTS - API TIENDA UCN
+================================================================================
+Fecha de generación: 26 de noviembre de 2025
+
+URL Base del Proyecto: http://localhost:5023
+Base URL API: http://localhost:5023/api
+
+NOTA: La URL base puede variar según el entorno:
+- Desarrollo local: http://localhost:5023
+- Producción: [Configurar según despliegue]
+
+================================================================================
+1. AUTHENTICATION CONTROLLER (AuthController)
+================================================================================
+Base Route: /api
+
+1.1 LOGIN
+    Endpoint: POST /api/login
+    Autenticación: No requerida (AllowAnonymous)
+    Body: LoginDTO
+        - email: string
+        - password: string
+    Response: GenericResponse<string>
+        - Token JWT
+    Descripción: Inicia sesión y retorna token de autenticación
+
+1.2 REGISTER
+    Endpoint: POST /api/register
+    Autenticación: No requerida (AllowAnonymous)
+    Body: RegisterDTO
+    Response: GenericResponse<string>
+    Descripción: Registra un nuevo usuario en el sistema
+
+1.3 VERIFY EMAIL
+    Endpoint: POST /api/verify
+    Autenticación: No requerida (AllowAnonymous)
+    Body: VerifyEmailDTO
+        - email: string
+        - code: string
+    Response: GenericResponse<string>
+    Descripción: Verifica el correo electrónico usando código enviado
+
+1.4 RESEND EMAIL VERIFICATION CODE
+    Endpoint: POST /api/resend-email-verification-code
+    Autenticación: No requerida (AllowAnonymous)
+    Body: ResendEmailVerificationCodeDTO
+        - email: string
+    Response: GenericResponse<string>
+    Descripción: Reenvía el código de verificación de correo
+
+1.5 RECOVER PASSWORD
+    Endpoint: POST /api/recover-password
+    Autenticación: No requerida (AllowAnonymous)
+    Body: RecoverPasswordDTO
+        - email: string
+    Response: GenericResponse<string>
+    Descripción: Inicia el flujo de recuperación de contraseña
+
+1.6 RESET PASSWORD
+    Endpoint: PATCH /api/reset-password
+    Autenticación: No requerida (AllowAnonymous)
+    Body: ResetPasswordDTO
+        - email: string
+        - code: string
+        - newPassword: string
+    Response: GenericResponse<string>
+    Descripción: Completa el restablecimiento de contraseña
+
+================================================================================
+2. USER CONTROLLER (UserController)
+================================================================================
+Base Route: /api/user
+
+2.1 GET PROFILE
+    Endpoint: GET /api/user/profile
+    Autenticación: Requerida (Authorize)
+    Response: UserProfileDTO
+    Descripción: Obtiene el perfil del usuario autenticado
+
+2.2 UPDATE PROFILE
+    Endpoint: PUT /api/user/profile
+    Autenticación: Requerida (Authorize)
+    Body: UpdateProfileDTO
+        - nombre
+        - rut
+        - teléfono
+        - email (puede gatillar nueva verificación)
+    Response: GenericResponse<UserProfileDTO>
+    Descripción: Actualiza los datos del perfil del usuario
+
+2.3 CHANGE PASSWORD
+    Endpoint: PATCH /api/user/change-password
+    Autenticación: Requerida (Authorize)
+    Body: ChangePasswordDTO
+        - currentPassword: string
+        - newPassword: string
+    Response: GenericResponse<object>
+    Descripción: Cambia la contraseña del usuario autenticado
+
+================================================================================
+3. ADMIN USER CONTROLLER (AdminUserController)
+================================================================================
+Base Route: /api
+
+3.1 GET ALL USERS
+    Endpoint: GET /api/admin/users
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Query Params: AdminUserSearchParamsDTO
+        - SearchTerm: string (opcional)
+        - PageNumber: int (default: 1)
+        - PageSize: int
+        - Status: string (opcional)
+        - Role: string (opcional)
+    Response: GenericResponse<PagedAdminUsersDTO>
+    Descripción: Obtiene listado paginado de todos los usuarios
+
+3.2 GET USER BY ID
+    Endpoint: GET /api/admin/users/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Response: GenericResponse<AdminUserDetailDTO>
+    Descripción: Obtiene el detalle de un usuario específico
+
+3.3 UPDATE USER STATUS
+    Endpoint: PATCH /api/admin/users/{id}/status
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Body: UpdateUserStatusDTO
+        - status: string (activo/bloqueado)
+    Response: GenericResponse<string>
+    Descripción: Actualiza el estado de un usuario (activo/bloqueado)
+
+3.4 UPDATE USER ROLE
+    Endpoint: PATCH /api/admin/users/{id}/role
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Body: UpdateUserRoleDTO
+        - role: string
+    Response: GenericResponse<string>
+    Descripción: Actualiza el rol de un usuario
+
+================================================================================
+4. PRODUCT CONTROLLER (ProductController)
+================================================================================
+Base Route: /api
+
+--- ENDPOINTS PÚBLICOS (Cliente) ---
+
+4.1 GET PUBLIC PRODUCTS (CATALOG)
+    Endpoint: GET /api/products
+    Autenticación: No requerida (AllowAnonymous)
+    Query Params: SearchParamsDTO
+        - SearchTerm: string (opcional)
+        - PageNumber: int (default: 1)
+        - PageSize: int
+        - CategoryIds: int[] (opcional)
+        - BrandIds: int[] (opcional)
+        - MinPrice: decimal (opcional)
+        - MaxPrice: decimal (opcional)
+        - OrderBy: string (opcional)
+    Response: GenericResponse<ListedProductsForCostumerDTO>
+    Descripción: Catálogo público de productos activos con filtros
+
+4.2 GET PUBLIC PRODUCT BY ID
+    Endpoint: GET /api/products/{productId}
+    Autenticación: No requerida (AllowAnonymous)
+    Path Params: productId (int)
+    Response: GenericResponse<ProductDetailDTO>
+    Descripción: Detalle público de un producto activo
+
+4.3 GET COSTUMER PRODUCTS (Legacy endpoint)
+    Endpoint: GET /api/costumer/products
+    Autenticación: No requerida (AllowAnonymous)
+    Query Params: SearchParamsDTO (igual que 4.1)
+    Response: GenericResponse<ListedProductsForCostumerDTO>
+    Descripción: Listado de productos para cliente (endpoint antiguo)
+
+--- ENDPOINTS ADMINISTRADOR ---
+
+4.4 GET ALL PRODUCTS FOR ADMIN
+    Endpoint: GET /api/admin/products
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Query Params: SearchParamsDTO
+    Response: GenericResponse<ListedProductsForAdminDTO>
+    Descripción: Lista productos para admin (incluye inactivos/eliminados)
+
+4.5 GET PRODUCT BY ID FOR ADMIN
+    Endpoint: GET /api/admin/{productId}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: productId (int)
+    Response: GenericResponse<ProductDetailDTO>
+    Descripción: Detalle interno de producto para administración
+
+4.6 GET DETAILED PRODUCT FOR ADMIN
+    Endpoint: GET /api/admin/{productId}/detailed
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: productId (int)
+    Response: GenericResponse<ProductDetailForAdminDTO>
+    Descripción: Detalle completo con información de auditoría
+
+4.7 CREATE PRODUCT (JSON)
+    Endpoint: POST /api/admin/create
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Body: CreateProductJsonDTO (application/json)
+    Response: 201 Created - GenericResponse<string>
+    Descripción: Crea producto sin archivos (para pruebas)
+
+4.8 CREATE PRODUCT WITH FILES
+    Endpoint: POST /api/admin/create-with-files
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Content-Type: multipart/form-data
+    Body: CreateProductDTO
+        - Datos del producto
+        - Images: IFormFile[]
+    Response: 201 Created - GenericResponse<string>
+    Descripción: Crea producto con imágenes (sube a Cloudinary)
+
+4.9 UPDATE PRODUCT
+    Endpoint: PUT /api/admin/products/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Content-Type: multipart/form-data
+    Body: UpdateProductDTO
+    Response: GenericResponse<string>
+    Descripción: Actualiza un producto existente
+
+4.10 TOGGLE PRODUCT AVAILABILITY
+    Endpoint: PATCH /api/admin/{id}/toggle-availability
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Response: GenericResponse<string>
+    Descripción: Activa o desactiva un producto
+
+4.11 DELETE PRODUCT
+    Endpoint: DELETE /api/admin/products/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Response: GenericResponse<string>
+    Descripción: Elimina un producto (soft delete)
+
+4.12 RESTORE PRODUCT
+    Endpoint: PATCH /api/admin/products/{id}/restore
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Response: GenericResponse<string>
+    Descripción: Restaura un producto eliminado
+
+4.13 ACTIVATE ALL PRODUCTS (Development/Testing)
+    Endpoint: POST /api/admin/activate-all
+    Autenticación: No requerida (AllowAnonymous) - Solo desarrollo
+    Response: GenericResponse<string>
+    Descripción: Activa todos los productos (temporal para pruebas)
+
+================================================================================
+5. CATEGORY CONTROLLER (CategoriesController)
+================================================================================
+Base Route: /api
+
+5.1 GET ALL CATEGORIES
+    Endpoint: GET /api/admin/categories
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Query Params: SearchParamsDTO
+        - SearchTerm: string (opcional)
+        - PageNumber: int
+        - PageSize: int
+    Response: GenericResponse<PagedCategoriesDTO>
+    Descripción: Lista paginada de categorías para admin
+
+5.2 GET CATEGORY BY ID
+    Endpoint: GET /api/admin/categories/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Response: GenericResponse<CategoryDetailDTO>
+    Descripción: Obtiene detalle de una categoría
+
+5.3 CREATE CATEGORY
+    Endpoint: POST /api/admin/categories
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Body: CategoryCreateDTO
+        - name: string
+        - slug: string
+        - description: string (opcional)
+    Response: 201 Created - GenericResponse<CategoryDetailDTO>
+    Descripción: Crea una nueva categoría
+
+5.4 UPDATE CATEGORY
+    Endpoint: PUT /api/admin/categories/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Body: CategoryUpdateDTO
+    Response: GenericResponse<CategoryDetailDTO>
+    Descripción: Actualiza una categoría existente
+
+5.5 DELETE CATEGORY
+    Endpoint: DELETE /api/admin/categories/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Response: GenericResponse<string>
+    Descripción: Elimina o marca como no disponible una categoría
+    Nota: Responde 409 si tiene productos asociados
+
+================================================================================
+6. BRAND CONTROLLER (BrandController)
+================================================================================
+Base Route: /api
+
+6.1 GET ALL BRANDS
+    Endpoint: GET /api/admin/brands
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Query Params: SearchParamsDTO
+        - SearchTerm: string (opcional)
+        - PageNumber: int
+        - PageSize: int
+    Response: GenericResponse<PagedBrandsDTO>
+    Descripción: Lista paginada de marcas para admin
+
+6.2 GET BRAND BY ID
+    Endpoint: GET /api/admin/brands/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Response: GenericResponse<BrandDetailDTO>
+    Descripción: Obtiene detalle de una marca específica
+
+6.3 CREATE BRAND
+    Endpoint: POST /api/admin/brands
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Body: BrandCreateDTO
+        - name: string
+        - slug: string
+        - description: string (opcional)
+    Response: 201 Created - GenericResponse<BrandDetailDTO>
+    Descripción: Crea una nueva marca
+
+6.4 UPDATE BRAND
+    Endpoint: PUT /api/admin/brands/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Body: BrandUpdateDTO
+    Response: GenericResponse<BrandDetailDTO>
+    Descripción: Actualiza una marca existente
+
+6.5 DELETE BRAND
+    Endpoint: DELETE /api/admin/brands/{id}
+    Autenticación: Admin (Authorize Roles = "Admin")
+    Path Params: id (int)
+    Response: GenericResponse<string>
+    Descripción: Elimina o deshabilita una marca
+    Nota: Responde 409 si tiene productos asociados
+
+================================================================================
+7. CART CONTROLLER (CartController)
+================================================================================
+Base Route: /api/cart
+
+7.1 GET CART
+    Endpoint: GET /api/cart
+    Autenticación: No requerida (AllowAnonymous) - Soporta usuarios anónimos
+    Response: GenericResponse<CartDTO>
+    Descripción: Obtiene el carrito actual (crea uno nuevo si no existe)
+
+7.2 ADD ITEM TO CART
+    Endpoint: POST /api/cart/items
+    Autenticación: No requerida (AllowAnonymous)
+    Content-Type: multipart/form-data
+    Body: AddCartItemDTO
+        - ProductId: int
+        - Quantity: int
+    Response: GenericResponse<CartDTO>
+    Descripción: Agrega un producto al carrito o incrementa cantidad
+
+7.3 REMOVE ITEM FROM CART
+    Endpoint: DELETE /api/cart/items/{productId}
+    Autenticación: No requerida (AllowAnonymous)
+    Path Params: productId (int)
+    Response: GenericResponse<CartDTO>
+    Descripción: Elimina completamente un producto del carrito
+
+7.4 UPDATE ITEM QUANTITY
+    Endpoint: PATCH /api/cart/items
+    Autenticación: No requerida (AllowAnonymous)
+    Content-Type: multipart/form-data
+    Body: ChangeItemQuantityDTO
+        - ProductId: int
+        - Quantity: int
+    Response: GenericResponse<CartDTO>
+    Descripción: Actualiza la cantidad de un producto en el carrito
+
+7.5 CLEAR CART
+    Endpoint: POST /api/cart/clear
+    Autenticación: No requerida (AllowAnonymous)
+    Response: GenericResponse<CartDTO>
+    Descripción: Vacía completamente el carrito
+
+7.6 CHECKOUT
+    Endpoint: POST /api/cart/checkout
+    Autenticación: Customer (Authorize Roles = "Customer")
+    Response: GenericResponse<CartDTO>
+    Descripción: Realiza checkout del carrito (solo usuarios autenticados)
+
+================================================================================
+8. ORDER CONTROLLER (OrderController)
+================================================================================
+Base Route: /api/order
+
+8.1 CREATE ORDER
+    Endpoint: POST /api/order/create
+    Autenticación: Cliente (Authorize Roles = "Cliente")
+    Response: 201 Created - GenericResponse<string>
+        - Retorna código único de la orden
+    Descripción: Crea una orden desde el carrito del usuario
+    Nota: Actualiza stock, vacía carrito, usa transacciones
+
+8.2 GET ORDER DETAIL
+    Endpoint: GET /api/order/detail/{orderCode}
+    Autenticación: Cliente (Authorize Roles = "Cliente")
+    Path Params: orderCode (string) - Formato: ORD-YYMMDDHHMMSS-XXX
+    Response: GenericResponse<OrderDetailDTO>
+    Descripción: Obtiene detalles completos de una orden específica
+
+8.3 GET USER ORDERS
+    Endpoint: GET /api/order/user-orders
+    Autenticación: Cliente (Authorize Roles = "Cliente")
+    Query Params: SearchParamsDTO
+        - SearchTerm: string (busca por código o items)
+        - PageNumber: int
+        - PageSize: int
+    Response: GenericResponse<ListedOrderDetailDTO>
+    Descripción: Obtiene historial de órdenes del usuario autenticado
+
+================================================================================
+9. FILE CONTROLLER (FileController)
+================================================================================
+Base Route: /api/File
+
+9.1 UPLOAD IMAGE
+    Endpoint: POST /api/File/upload/{productId}
+    Autenticación: No especificada en el código (verificar middleware)
+    Path Params: productId (int)
+    Content-Type: multipart/form-data
+    Body: 
+        - file: IFormFile (imagen)
+    Response: 
+        - 200 OK: { message, success: true }
+        - 400 Bad Request: { message, success: false }
+    Descripción: Sube una imagen para un producto a Cloudinary
+
+9.2 DELETE IMAGE
+    Endpoint: DELETE /api/File/{publicId}
+    Autenticación: No especificada
+    Path Params: publicId (string) - ID público de la imagen en Cloudinary
+    Response:
+        - 200 OK: { message, success: true }
+        - 404 Not Found: { message, success: false }
+    Descripción: Elimina una imagen usando su publicId de Cloudinary
+
+9.3 TEST ENDPOINT
+    Endpoint: GET /api/File/test
+    Autenticación: No requerida
+    Response: { message, timestamp }
+    Descripción: Endpoint de prueba para verificar funcionamiento
+
+================================================================================
+NOTAS IMPORTANTES
+================================================================================
+
+1. AUTENTICACIÓN Y AUTORIZACIÓN:
+   - Tokens JWT se envían en header: Authorization: Bearer {token}
+   - Roles disponibles: "Admin", "Customer", "Cliente"
+   - Algunos endpoints soportan usuarios anónimos (AllowAnonymous)
+
+2. PAGINACIÓN:
+   - PageNumber: Número de página (empieza en 1)
+   - PageSize: Cantidad de elementos por página
+   - Response incluye: TotalCount, PageNumber, PageSize, TotalPages
+
+3. FILTROS Y BÚSQUEDA:
+   - SearchTerm: Búsqueda de texto libre
+   - Filtros específicos varían por endpoint (CategoryIds, BrandIds, etc.)
+   - OrderBy: Campo por el cual ordenar resultados
+
+4. RESPUESTAS ESTÁNDAR:
+   Todas las respuestas exitosas usan GenericResponse<T>:
+   {
+     "message": "string",
+     "data": T
+   }
+
+5. CÓDIGOS HTTP:
+   - 200: OK - Operación exitosa
+   - 201: Created - Recurso creado exitosamente
+   - 400: Bad Request - Datos inválidos
+   - 401: Unauthorized - No autenticado
+   - 403: Forbidden - Sin permisos
+   - 404: Not Found - Recurso no encontrado
+   - 409: Conflict - Conflicto (ej: nombre duplicado, productos asociados)
+   - 500: Internal Server Error - Error del servidor
+
+6. CARRITO:
+   - Soporta usuarios anónimos mediante cookie/buyerId
+   - Al hacer login, se asocia carrito anónimo con usuario
+   - Checkout solo para usuarios autenticados
+
+7. PRODUCTOS:
+   - Soft delete: Los productos no se eliminan físicamente
+   - IsActive: Controla visibilidad en catálogo público
+   - IsDeleted: Marca productos eliminados (pueden restaurarse)
+
+8. ARCHIVOS/IMÁGENES:
+   - Se suben a Cloudinary
+   - Soporta múltiples imágenes por producto
+   - Rollback automático si falla la subida
+
+9. ÓRDENES:
+   - Código único formato: ORD-YYMMDDHHMMSS-XXX
+   - Usan transacciones para garantizar consistencia
+   - Actualizan stock automáticamente
+   - Vacían el carrito después de crear orden
+
+10. ADMINISTRACIÓN:
+    - Panel admin tiene endpoints separados (/api/admin/*)
+    - Todos requieren rol "Admin"
+    - Incluyen soft delete y restauración
+    - Gestión de usuarios, productos, categorías y marcas
+
+================================================================================
+FIN DE DOCUMENTACIÓN
+================================================================================

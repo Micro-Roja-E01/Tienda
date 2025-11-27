@@ -1,3 +1,5 @@
+using Tienda.src.Application.Domain.Models;
+
 namespace tienda.src.Application.DTO.ProductDTO.CostumerDTO
 {
     /// <summary>
@@ -79,5 +81,6 @@ namespace tienda.src.Application.DTO.ProductDTO.CostumerDTO
         /// Fecha de última actualización del producto.
         /// </summary>
         public required DateTime UpdatedAt { get; set; }
+        public required string StatusName { get; set; }
     }
 }

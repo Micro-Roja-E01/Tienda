@@ -1,3 +1,5 @@
+using Tienda.src.Application.Domain.Models;
+
 namespace tienda.src.Application.DTO.ProductDTO
 {
     /// <summary>

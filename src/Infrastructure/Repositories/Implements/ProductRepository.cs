@@ -394,7 +394,8 @@ namespace tienda.src.Infrastructure.Repositories.Implements
                     StockIndicator = indicator,
                     CategoryName = p.CategoryName,
                     BrandName = p.BrandName,
-                    IsAvailable = p.IsAvailable
+                    IsAvailable = p.IsAvailable,
+                    StatusName = p.Status.ToString()
                 };
             }).ToList();
 

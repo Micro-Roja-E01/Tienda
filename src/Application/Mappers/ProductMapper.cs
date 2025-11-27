@@ -79,7 +79,8 @@ namespace Tienda.src.Application.Mappers
                     src => src.Brand != null ? src.Brand.Name : "Sin marca")
                 .Map(dest => dest.IsAvailable, src => src.IsAvailable)
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
-                .Map(dest => dest.UpdatedAt, src => src.UpdatedAt);
+                .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
+                .Map(dest => dest.StatusName, src => src.Status.ToString());
         }
 
         /// <summary>

@@ -1,3 +1,5 @@
+using Tienda.src.Application.Domain.Models;
+
 namespace tienda.src.Application.DTO.ProductDTO.CostumerDTO
 {
     /// <summary>
@@ -64,5 +66,6 @@ namespace tienda.src.Application.DTO.ProductDTO.CostumerDTO
         /// Indica si el producto tiene descuento activo
         /// </summary>
         public bool HasDiscount => Discount > 0;
+        public required string StatusName { get; set; }
     }
 }
