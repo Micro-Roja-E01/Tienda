@@ -131,8 +131,8 @@ namespace Tienda.src.API.Controllers
         /// <response code="403">Usuario no tiene el rol necesario</response>
         /// <response code="404">Carrito no encontrado o vacío</response>
         /// <response code="500">Error interno del servidor</response>
+        [Authorize]
         [HttpPost("checkout")]
-        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CheckoutAsync()
         {
             var buyerId = GetBuyerId();
