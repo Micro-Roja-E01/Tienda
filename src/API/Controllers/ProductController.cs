@@ -95,8 +95,12 @@ namespace Tienda.src.API.Controllers
         [ProducesResponseType(typeof(GenericResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllForAdminAsync([FromQuery] SearchParamsDTO searchParams)
         {
-            var result = await _productService.GetFilteredForAdminAsync(searchParams);
-            return Ok(result);
+            var page = await _productService.GetFilteredForAdminAsync(searchParams);
+            var message = page.TotalCount == 0
+                ? "No se encontraron productos con los criterios especificados"
+                : "Productos obtenidos exitosamente";
+
+            return Ok(new GenericResponse<ListedProductsForAdminDTO>(message, page));
         }
 
         /// <summary>

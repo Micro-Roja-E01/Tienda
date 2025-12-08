@@ -37,6 +37,7 @@ namespace Tienda.src.Application.Mappers
             ConfigureProductMappings();
             ConfigureProductDetailMappings();
             ConfigureProductDetailForAdminMappings();
+            ConfigureProductForAdminMappings();
         }
 
         /// <summary>
@@ -117,6 +118,29 @@ namespace Tienda.src.Application.Mappers
                     src.Stock <= 0 ? "Sin stock" :
                     src.Stock <= _fewUnitsAvailable ? "Últimas unidades" :
                     "En stock");
+        }
+        public void ConfigureProductForAdminMappings()
+        {
+            TypeAdapterConfig<Product, ProductForAdminDTO>.NewConfig()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.Title, src => src.Title)
+                .Map(dest => dest.MainImageURL,
+                    src => src.Images.Any()
+                        ? src.Images.First().ImageUrl
+                        : _defaultImageUrl)
+                .Map(dest => dest.Price, src => src.Price.ToString("C0"))  // o sin formato si prefieres
+                .Map(dest => dest.Stock, src => src.Stock)
+                .Map(dest => dest.StockIndicator,
+                    src => src.Stock <= 0 ? "Sin stock" :
+                    src.Stock <= _fewUnitsAvailable ? "Últimas unidades" :
+                    "Con stock")
+                .Map(dest => dest.CategoryName,
+                    src => src.Category != null ? src.Category.Name : "Sin categoría")
+                .Map(dest => dest.BrandName,
+                    src => src.Brand != null ? src.Brand.Name : "Sin marca")
+                .Map(dest => dest.StatusName, src => src.Status.ToString())
+                .Map(dest => dest.IsAvailable, src => src.IsAvailable)
+                .Map(dest => dest.UpdateAt, src => src.UpdatedAt);
         }
     }
 }
