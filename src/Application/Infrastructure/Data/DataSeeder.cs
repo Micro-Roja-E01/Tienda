@@ -344,6 +344,7 @@ namespace Tienda.src.Infrastructure.Data
                             .RuleFor(p => p.Title, f => f.Commerce.ProductName())
                             .RuleFor(p => p.Description, f => f.Commerce.ProductDescription())
                             .RuleFor(p => p.Price, f => f.Random.Int(1000, 100000))
+                            .RuleFor(p => p.Discount, _ => 0)
                             .RuleFor(p => p.Stock, f => f.Random.Int(1, 100))
                             .RuleFor(p => p.CategoryId, f => f.PickRandom(categoryIds))
                             .RuleFor(p => p.BrandId, f => f.PickRandom(brandIds))
@@ -351,6 +352,15 @@ namespace Tienda.src.Infrastructure.Data
                             .RuleFor(p => p.IsAvailable, _ => true);
 
                         var products = productFaker.Generate(50);
+
+                        // Asignar descuentos a solo 1/3 de los productos
+                        var faker = new Faker();
+                        int discountCount = products.Count / 3;
+                        for (int i = 0; i < discountCount; i++)
+                        {
+                            products[i].Discount = faker.Random.Int(5, 100);
+                        }
+
                         await context.Products.AddRangeAsync(products);
                         await context.SaveChangesAsync();
                         Log.Information("Productos creados con éxito.");
